@@ -39,7 +39,7 @@ spring:
 app:
   upload:
     dir: ${UPLOAD_DIR:./uploads}
-    base-url: ${UPLOAD_BASE_URL:http://localhost:8091/files}
+    base-url: ${UPLOAD_BASE_URL:http://localhost:8091/api/files}
 
 management:
   endpoints:

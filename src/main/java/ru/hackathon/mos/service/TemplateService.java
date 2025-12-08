@@ -35,13 +35,12 @@ public class TemplateService {
 
     private final ProjectTemplateRepository templateRepo;
     private final FileEntityRepository fileRepo;
-    private final Path uploadPath = Paths.get("./uploads");
     private final AppConfig appConfig;
 
     @PostConstruct
     public void init() {
         try {
-            Files.createDirectories(uploadPath);
+            Files.createDirectories(Path.of(appConfig.getDir()));
         } catch (IOException e) {
             throw new RuntimeException("Не удалось создать папку для файлов", e);
         }
@@ -168,7 +167,7 @@ public class TemplateService {
 
             String uuid = UUID.randomUUID().toString();
             String filename = uuid + "." + ext;
-            Path path = uploadPath.resolve(filename);
+            Path path = Paths.get(appConfig.getDir()).resolve(filename);
             Files.copy(file.getInputStream(), path);
 
             FileEntity fe = new FileEntity();

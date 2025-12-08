@@ -25,7 +25,7 @@ class FileController {
     private final FileEntityRepository fileRepo;
     private final Path uploadPath = Paths.get("./uploads");
 
-    @GetMapping("/files/{id}")
+    @GetMapping("/api/files/{id}")
     public ResponseEntity<Resource> serveFile(@PathVariable Long id) throws IOException {
         FileEntity file = fileRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
