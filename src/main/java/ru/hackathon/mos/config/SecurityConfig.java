@@ -32,7 +32,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/templates/**").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
                         .requestMatchers(HttpMethod.PUT, "/api/templates/**").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
                         .requestMatchers("/api/v1/events/**").hasAuthority("ROLE_hackathon.admin")
-                        .requestMatchers("/actuator/**").hasAuthority("ROLE_hackathon.admin")
+                        .requestMatchers("/actuator/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2

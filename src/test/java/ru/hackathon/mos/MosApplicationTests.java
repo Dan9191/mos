@@ -1,8 +1,7 @@
 package ru.hackathon.mos;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import ru.hackathon.mos.config.*;
+import ru.hackathon.mos.config.BaseTestWithContext;
 
 class MosApplicationTests extends BaseTestWithContext {
 

@@ -1,6 +1,6 @@
 package ru.hackathon.mos.dto.template;
 
-import java.math.*;
+import java.math.BigDecimal;
 
 public record TemplateCreateRequest(
         String title,
