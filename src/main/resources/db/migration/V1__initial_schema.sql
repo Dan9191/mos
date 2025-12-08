@@ -33,17 +33,14 @@ CREATE TABLE file_entity (
                              filename       VARCHAR(512) NOT NULL,
                              mime_type      VARCHAR(128) NOT NULL,
                              size_bytes     BIGINT       NOT NULL CHECK (size_bytes >= 0),
-                             storage_path   VARCHAR(1024) NOT NULL UNIQUE,
+                             file_data      BYTEA        NOT NULL,
                              file_role      VARCHAR(64)  DEFAULT 'attachment',
                              sort_order     INTEGER      DEFAULT 0,
-                             uploaded_by    BIGINT,
+                             uploaded_by    VARCHAR(64),
                              created_at     TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
                              UNIQUE(owner_type, owner_id, file_role, sort_order)
 );
 
-CREATE INDEX idx_file_owner          ON file_entity(owner_type, owner_id);
-CREATE INDEX idx_file_role           ON file_entity(file_role);
-CREATE INDEX idx_file_preview        ON file_entity(owner_type, owner_id) WHERE file_role = 'preview';
 
 COMMENT ON TABLE  file_entity                             IS 'Универсальное хранилище всех файлов системы (одна таблица на всё приложение)';
 COMMENT ON COLUMN file_entity.id                          IS 'Уникальный идентификатор файла';
@@ -52,7 +49,7 @@ COMMENT ON COLUMN file_entity.owner_id                    IS 'ID объекта-
 COMMENT ON COLUMN file_entity.filename                    IS 'Оригинальное имя файла (например, домик.jpg, смета.pdf)';
 COMMENT ON COLUMN file_entity.mime_type                   IS 'MIME-тип файла (image/jpeg, application/pdf и т.д.)';
 COMMENT ON COLUMN file_entity.size_bytes                  IS 'Размер файла в байтах';
-COMMENT ON COLUMN file_entity.storage_path                IS 'Относительный путь к файлу на диске: /uploads/uuid-123.jpg';
+COMMENT ON COLUMN file_entity.file_data                   IS 'Бинарные данные файла';
 COMMENT ON COLUMN file_entity.file_role                   IS 'Роль файла в контексте владельца: preview, gallery, document, plan, photo, avatar, receipt и т.д.';
 COMMENT ON COLUMN file_entity.sort_order                  IS 'Порядок сортировки (особенно для галереи)';
 COMMENT ON COLUMN file_entity.uploaded_by                 IS 'ID пользователя, загрузившего файл (ссылка на будущую таблицу user)';

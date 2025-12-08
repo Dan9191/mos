@@ -54,12 +54,8 @@ public class FileEntity {
     @Column(name = "size_bytes", nullable = false)
     private Long sizeBytes;
 
-    /**
-     * Путь к файлу на диске относительно корня приложения.
-     * Пример: /uploads/550e8400-e29b-41d4-a716-446655440000.jpg
-     */
-    @Column(name = "storage_path", nullable = false, unique = true, length = 1024)
-    private String storagePath;
+    @Column(name = "file_data", nullable = false, columnDefinition = "BYTEA")
+    private byte[] fileData;
 
     /**
      * Роль файла в контексте владельца.
@@ -78,7 +74,7 @@ public class FileEntity {
      * ID пользователя, загрузившего файл (будет ссылкой на таблицу user).
      */
     @Column(name = "uploaded_by")
-    private Long uploadedBy;
+    private String uploadedBy;
 
     /**
      * Дата и время загрузки файла.

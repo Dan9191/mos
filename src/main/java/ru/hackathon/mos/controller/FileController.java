@@ -1,8 +1,8 @@
 package ru.hackathon.mos.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -14,32 +14,42 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.hackathon.mos.entity.FileEntity;
 import ru.hackathon.mos.repository.FileEntityRepository;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Controller
 @RequiredArgsConstructor
 class FileController {
 
     private final FileEntityRepository fileRepo;
-    private final Path uploadPath = Paths.get("./uploads");
 
     @GetMapping("/api/files/{id}")
-    public ResponseEntity<Resource> serveFile(@PathVariable Long id) throws IOException {
+    public ResponseEntity<Resource> serveFile(@PathVariable Long id) {
         FileEntity file = fileRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        Path filePath = uploadPath.resolve(Paths.get(file.getStoragePath()).getFileName());
-        Resource resource = new UrlResource(filePath.toUri());
-
-        if (!resource.exists() || !resource.isReadable()) {
+        ByteArrayResource resource = new ByteArrayResource(file.getFileData());
+        if (file.getFileData().length == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(file.getMimeType()))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + file.getFilename() + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + encodeFilename(file.getFilename()) + "\"")
+                .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(file.getSizeBytes()))
                 .body(resource);
+    }
+
+    /**
+     * Кодирование имени файла для безопасной передачи в HTTP-заголовках
+     */
+    private String encodeFilename(String filename) {
+        try {
+            return URLEncoder.encode(filename, StandardCharsets.UTF_8)
+                    .replace("+", "%20");
+        } catch (Exception e) {
+            return filename;
+        }
     }
 }

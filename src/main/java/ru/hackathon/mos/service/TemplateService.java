@@ -1,6 +1,5 @@
 package ru.hackathon.mos.service;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,11 +21,7 @@ import ru.hackathon.mos.repository.FileEntityRepository;
 import ru.hackathon.mos.repository.ProjectTemplateRepository;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -37,14 +32,6 @@ public class TemplateService {
     private final FileEntityRepository fileRepo;
     private final AppConfig appConfig;
 
-    @PostConstruct
-    public void init() {
-        try {
-            Files.createDirectories(Path.of(appConfig.getDir()));
-        } catch (IOException e) {
-            throw new RuntimeException("Не удалось создать папку для файлов", e);
-        }
-    }
 
     // 1. Список шаблонов
     public Page<TemplateListDto> getActiveTemplates(Pageable pageable) {
@@ -105,8 +92,18 @@ public class TemplateService {
         );
     }
 
-    // 3. Создание
-    public ProjectTemplate createTemplate(TemplateCreateRequest request, MultipartFile[] files) throws IOException {
+    /**
+     * Создание шаблона.
+     *
+     * @param request     Данные запроса на создание шаблона.
+     * @param files       Приложенные файлы.
+     * @param ownerUserId ID пользователя, который сохраняет файл.
+     * @return            Результат сохранения.
+     * @throws IOException ошибка чтения файла.
+     */
+    public ProjectTemplate createTemplate(TemplateCreateRequest request,
+                                          MultipartFile[] files,
+                                          String ownerUserId) throws IOException {
         ProjectTemplate template = new ProjectTemplate();
         template.setTitle(request.title());
         template.setDescription(request.description());
@@ -117,12 +114,24 @@ public class TemplateService {
         template.setIsActive(true);
 
         ProjectTemplate saved = templateRepo.save(template);
-        saveFiles(saved.getId(), files);
+        saveFiles(saved.getId(), files, ownerUserId);
         return saved;
     }
 
-    // 4. Обновление
-    public ProjectTemplate updateTemplate(Long id, TemplateCreateRequest request, MultipartFile[] newFiles) throws IOException {
+    /**
+     * Обновление шаблона.
+     *
+     * @param id          ID шаблона.
+     * @param request     Данные запроса на обновление шаблона.
+     * @param newFiles    Новые файлы.
+     * @param ownerUserId ID пользователя, который сохраняет файл.
+     * @return Результат сохранения.
+     * @throws IOException ошибка чтения файла.
+     */
+    public ProjectTemplate updateTemplate(Long id,
+                                          TemplateCreateRequest request,
+                                          MultipartFile[] newFiles,
+                                          String ownerUserId) throws IOException {
         ProjectTemplate template = templateRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
@@ -135,7 +144,7 @@ public class TemplateService {
         template.setIsActive(request.isActive());
 
         if (newFiles != null && newFiles.length > 0) {
-            saveFiles(id, newFiles);
+            saveFiles(id, newFiles, ownerUserId);
         }
 
         return templateRepo.save(template);
@@ -143,20 +152,24 @@ public class TemplateService {
 
 
     /**
-     * Сохранение файлов. Первый файл формата jpeg получает тип "preview", остальные "gallery".
-     * Файл формата pdf получает тип "document".
+     * Сохранение файлов при создании шаблона.
      *
-     * @param templateId Идентификатор шаблона
-     * @param files      Массив файлов
-     * @throws IOException
+     * @param templateId  ID шаблона.
+     * @param files       Новые файлы.
+     * @param ownerUserId ID пользователя, который сохраняет файл.
+     * @throws IOException ошибка чтения файла.
      */
-    private void saveFiles(Long templateId, MultipartFile[] files) throws IOException {
-        if (files == null) return;
+    @Transactional
+    public void saveFiles(Long templateId, MultipartFile[] files, String ownerUserId) throws IOException {
+        if (files == null || files.length == 0) return;
 
+        // Проверяем, есть ли уже превью
         boolean hasPreview = fileRepo.existsByOwnerTypeAndOwnerIdAndFileRole(
                 "project_template", templateId, "preview"
         );
+
         int currentSortOrder = 1;
+
         for (MultipartFile file : files) {
             if (file.isEmpty()) continue;
 
@@ -165,44 +178,52 @@ public class TemplateService {
             if (ext == null) continue;
             ext = ext.toLowerCase();
 
-            String uuid = UUID.randomUUID().toString();
-            String filename = uuid + "." + ext;
-            Path path = Paths.get(appConfig.getDir()).resolve(filename);
-            Files.copy(file.getInputStream(), path);
+            // Создаем сущность файла
+            FileEntity fileEntity = new FileEntity();
+            fileEntity.setOwnerType("project_template");
+            fileEntity.setOwnerId(templateId);
+            fileEntity.setFilename(originalName);
+            fileEntity.setMimeType(file.getContentType());
+            fileEntity.setSizeBytes(file.getSize());
 
-            FileEntity fe = new FileEntity();
-            fe.setOwnerType("project_template");
-            fe.setOwnerId(templateId);
-            fe.setFilename(originalName);
-            fe.setMimeType(file.getContentType());
-            fe.setSizeBytes(file.getSize());
-            fe.setStoragePath("/uploads/" + filename);
+            // Читаем файл в байтовый массив
+            byte[] fileData = file.getBytes();
+            fileEntity.setFileData(fileData);
 
+            // Определяем роль файла
             String fileRole;
-
-
-            if (ext.equals("pdf")) {
+            if ("pdf".equals(ext)) {
                 fileRole = "document";
-                fe.setFileRole(fileRole);
-                fe.setSortOrder(currentSortOrder++);
-            } else if (ext.equals("jpg") || ext.equals("jpeg") || ext.equals("png") || ext.equals("webp")) {
+                fileEntity.setFileRole(fileRole);
+                fileEntity.setSortOrder(currentSortOrder++);
+            } else if (isImageExtension(ext)) {
                 if (!hasPreview) {
                     fileRole = "preview";
                     hasPreview = true;
-                    fe.setFileRole(fileRole);
-                    fe.setSortOrder(currentSortOrder++);
+                    fileEntity.setFileRole(fileRole);
+                    fileEntity.setSortOrder(0);
                 } else {
                     fileRole = "gallery";
-                    fe.setFileRole(fileRole);
-                    fe.setSortOrder(currentSortOrder++);
+                    fileEntity.setFileRole(fileRole);
+                    fileEntity.setSortOrder(currentSortOrder++);
                 }
             } else {
                 fileRole = "gallery";
-                fe.setFileRole(fileRole);
-                fe.setSortOrder(currentSortOrder++);
+                fileEntity.setFileRole(fileRole);
+                fileEntity.setSortOrder(currentSortOrder++);
             }
 
-            fileRepo.save(fe);
+            fileEntity.setUploadedBy(ownerUserId);
+
+            fileRepo.save(fileEntity);
         }
+    }
+
+    /**
+     * Проверка, является ли расширение изображением
+     */
+    private boolean isImageExtension(String ext) {
+        return List.of("jpg", "jpeg", "png", "webp", "gif", "bmp", "svg")
+                .contains(ext.toLowerCase());
     }
 }
