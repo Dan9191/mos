@@ -143,14 +143,30 @@ public class TemplateService {
     }
 
 
+    /**
+     * Сохранение файлов. Первый файл формата jpeg получает тип "preview", остальные "gallery".
+     * Файл формата pdf получает тип "document".
+     *
+     * @param templateId Идентификатор шаблона
+     * @param files      Массив файлов
+     * @throws IOException
+     */
     private void saveFiles(Long templateId, MultipartFile[] files) throws IOException {
         if (files == null) return;
 
+        boolean hasPreview = fileRepo.existsByOwnerTypeAndOwnerIdAndFileRole(
+                "project_template", templateId, "preview"
+        );
+        int currentSortOrder = 1;
         for (MultipartFile file : files) {
             if (file.isEmpty()) continue;
 
+            String originalName = file.getOriginalFilename();
+            String ext = StringUtils.getFilenameExtension(originalName);
+            if (ext == null) continue;
+            ext = ext.toLowerCase();
+
             String uuid = UUID.randomUUID().toString();
-            String ext = StringUtils.getFilenameExtension(file.getOriginalFilename());
             String filename = uuid + "." + ext;
             Path path = uploadPath.resolve(filename);
             Files.copy(file.getInputStream(), path);
@@ -158,15 +174,34 @@ public class TemplateService {
             FileEntity fe = new FileEntity();
             fe.setOwnerType("project_template");
             fe.setOwnerId(templateId);
-            fe.setFilename(file.getOriginalFilename());
+            fe.setFilename(originalName);
             fe.setMimeType(file.getContentType());
             fe.setSizeBytes(file.getSize());
             fe.setStoragePath("/uploads/" + filename);
 
-            // Определяем роль: если это первое превью — preview, иначе gallery
-            boolean hasPreview = fileRepo.existsByOwnerTypeAndOwnerIdAndFileRole("project_template", templateId, "preview");
-            fe.setFileRole(hasPreview ? "gallery" : "preview");
-            fe.setSortOrder(0); // можно улучшить
+            String fileRole;
+
+
+            if (ext.equals("pdf")) {
+                fileRole = "document";
+                fe.setFileRole(fileRole);
+                fe.setSortOrder(currentSortOrder++);
+            } else if (ext.equals("jpg") || ext.equals("jpeg") || ext.equals("png") || ext.equals("webp")) {
+                if (!hasPreview) {
+                    fileRole = "preview";
+                    hasPreview = true;
+                    fe.setFileRole(fileRole);
+                    fe.setSortOrder(currentSortOrder++);
+                } else {
+                    fileRole = "gallery";
+                    fe.setFileRole(fileRole);
+                    fe.setSortOrder(currentSortOrder++);
+                }
+            } else {
+                fileRole = "gallery";
+                fe.setFileRole(fileRole);
+                fe.setSortOrder(currentSortOrder++);
+            }
 
             fileRepo.save(fe);
         }

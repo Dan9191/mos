@@ -1,14 +1,13 @@
-
 server:
-  port: 8091
+  port: ${SERVER_PORT:8091}
 
 spring:
   application:
     name: mos
   datasource:
     url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/test?currentSchema=mos}
-    username: test
-    password: test
+    username: ${DATASOURCE_NAME:test}
+    password: ${DATASOURCE_PASSWORD:test}
     driver-class-name: org.postgresql.Driver
   data:
     web:
@@ -19,7 +18,6 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
-    show-sql: true
     properties:
       hibernate:
         default_schema: mos
@@ -32,9 +30,13 @@ spring:
     oauth2:
       resource-server:
         jwt:
-          issuer-uri: https://auth.mos-hack.ru/realms/hackathon
+          issuer-uri: ${KEYCLOAK:http://localhost:9090/realms/hackathon}
+  servlet:
+    multipart:
+      max-file-size: ${MAX_FILE_SIZE:5MB}
+      max-request-size: ${MAX_REQUEST_SIZE:5MB}
 
 app:
   upload:
-    dir: ./uploads                    # можно переопределить: /var/www/mosstroy/uploads
-    base-url: http://localhost:8091/files   # в продакшене будет https://cdn.example.com
+    dir: ${UPLOAD_DIR:./uploads}
+    base-url: ${UPLOAD_BASE_URL:http://localhost:8091/files}
