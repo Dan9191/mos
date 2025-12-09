@@ -29,19 +29,39 @@ public class SecurityConfig {
                     config.setAllowedOrigins(List.of("http://localhost:3000", "https://mos-hack.ru/"));
                     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     config.setAllowedHeaders(List.of("*"));
+                    config.setAllowedHeaders(List.of(
+                            "Authorization",
+                            "Content-Type",
+                            "X-Requested-With",
+                            "Accept",
+                            "Origin",
+                            "Access-Control-Request-Method",
+                            "Access-Control-Request-Headers"
+                    ));
                     config.setAllowCredentials(true);
                     return config;
                 }))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS).permitAll()
-                        .requestMatchers("/files/**").permitAll()
                         .requestMatchers("/api/files/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/templates/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/templates/**").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
                         .requestMatchers(HttpMethod.PUT, "/api/templates/**").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
                         .requestMatchers("/api/v1/events/**").hasAuthority("ROLE_hackathon.admin")
                         .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers(
+                                "/api/swagger-ui.html",
+                                "/api/swagger-ui/**",
+                                "/api/v3/api-docs",
+                                "/api/v3/api-docs/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs",
+                                "/v3/api-docs/**",
+                                "/api/webjars/**",
+                                "/webjars/**"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2

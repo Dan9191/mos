@@ -1,6 +1,8 @@
 package ru.hackathon.mos.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,32 +29,43 @@ import ru.hackathon.mos.service.TemplateService;
 
 import java.io.IOException;
 
+/**
+ * Контроллер для работы с архитектурными шаблонами.
+ */
 @RestController
 @RequestMapping("/api/templates")
 @RequiredArgsConstructor
 public class TemplateController {
 
+    /**
+     * Сервис работы с шаблонами.
+     */
     private final TemplateService templateService;
 
-
+    @Operation(summary = "Список активных шаблонов-проектов", description = "Получение списка активных шаблонов с пагинацией")
     @GetMapping
     public Page<TemplateListDto> list(
+            @Parameter(description = "Настройки пагинации")
             @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC)
             Pageable pageable) {
 
         return templateService.getActiveTemplates(pageable);
     }
 
+    @Operation(summary = "Детали шаблона-проекта", description = "Получение детальной информации о шаблоне по ID")
     @GetMapping("/{id}")
-    public TemplateDetailDto get(@PathVariable Long id) {
+    public TemplateDetailDto get(
+            @Parameter(description = "ID шаблона") @PathVariable Long id) {
         return templateService.getTemplate(id);
     }
 
+    @Operation(summary = "Создание шаблона проекта", description = "Создание нового архитектурного шаблона с возможностью прикрепления файлов")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ProjectTemplate> create(
-            @AuthenticationPrincipal Jwt jwt,
-            @RequestPart("data") String dataJson,
-            @RequestPart(value = "files", required = false) MultipartFile[] files) throws IOException {
+            @Parameter(hidden = true) @AuthenticationPrincipal Jwt jwt,
+            @Parameter(description = "JSON с данными шаблона") @RequestPart("data") String dataJson,
+            @Parameter(description = "Файлы, прикрепленные к шаблону") @RequestPart(value = "files", required = false) MultipartFile[] files
+    ) throws IOException {
         String userId = jwt.getSubject();
         ObjectMapper mapper = new ObjectMapper();
         TemplateCreateRequest request = mapper.readValue(dataJson, TemplateCreateRequest.class);
@@ -61,12 +74,14 @@ public class TemplateController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
+    @Operation(summary = "Обновление шаблона проекта", description = "Обновление существующего шаблона по ID с возможностью прикрепления файлов")
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ProjectTemplate update(
-            @AuthenticationPrincipal Jwt jwt,
-            @PathVariable Long id,
-            @RequestPart("data") TemplateCreateRequest request,
-            @RequestPart(value = "files", required = false) MultipartFile[] files) throws IOException {
+            @Parameter(hidden = true) @AuthenticationPrincipal Jwt jwt,
+            @Parameter(description = "ID шаблона для обновления") @PathVariable Long id,
+            @Parameter(description = "Новые данные шаблона") @RequestPart("data") TemplateCreateRequest request,
+            @Parameter(description = "Файлы для обновления шаблона") @RequestPart(value = "files", required = false) MultipartFile[] files
+    ) throws IOException {
         String userId = jwt.getSubject();
         return templateService.updateTemplate(id, request, files, userId);
     }
