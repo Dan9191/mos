@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: mos
+    name: ${SPRING_APPLICATION_NAME:mos}
   datasource:
     url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/test?currentSchema=mos}
     username: ${DATASOURCE_NAME:test}

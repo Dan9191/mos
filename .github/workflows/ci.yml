@@ -112,8 +112,8 @@ jobs:
           git config user.email "ci@github"
           git config user.name "GitHub Actions"
 
-          yq -i '.spec.template.spec.containers[0].image = "ghcr.io/${{ env.REPO_OWNER_LC}}/mos:sha-${{ github.sha }}"' apps/mos/backend/deployment.yaml
+          yq -i '.spec.template.spec.containers[0].image = "ghcr.io/${{ env.REPO_OWNER_LC}}/mos:sha-${{ github.sha }}"' apps/mos/backend/mos-deployment.yaml
 
-          git add apps/mos/backend/deployment.yaml
+          git add apps/mos/backend/mos-deployment.yaml
           git commit -m "Update mos backend image to sha-${{ github.sha }}"
           git push origin main
