@@ -2,6 +2,7 @@ package ru.hackathon.mos.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -23,17 +24,36 @@ import ru.hackathon.mos.repository.ProjectTemplateRepository;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Сервис работы с шаблонами.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class TemplateService {
 
+    /**
+     * Репозиторий работы с шаблонами.
+     */
     private final ProjectTemplateRepository templateRepo;
+
+    /**
+     * Репозиторий работы с файлами.
+     */
     private final FileEntityRepository fileRepo;
+
+    /**
+     * Конфигурация приложения.
+     */
     private final AppConfig appConfig;
 
-
-    // 1. Список шаблонов
+    /**
+     * Получение списка активных шаблонов.
+     *
+     * @param pageable Настройки пагинации.
+     * @return списка активных шаблонов.
+     */
     public Page<TemplateListDto> getActiveTemplates(Pageable pageable) {
         Page<ProjectTemplate> page = templateRepo.findAllByIsActiveTrue(pageable);
 
@@ -62,7 +82,12 @@ public class TemplateService {
         return new PageImpl<>(dtos, pageable, page.getTotalElements());
     }
 
-    // 2. Детальная информация
+    /**
+     * Получение данных конкретного шаблона.
+     *
+     * @param id ID шаблона.
+     * @return детальная информация.
+     */
     public TemplateDetailDto getTemplate(Long id) {
         ProjectTemplate template = templateRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Шаблон не найден"));
@@ -115,6 +140,7 @@ public class TemplateService {
 
         ProjectTemplate saved = templateRepo.save(template);
         saveFiles(saved.getId(), files, ownerUserId);
+        log.info("Template with id {} was created", saved.getId());
         return saved;
     }
 
@@ -147,6 +173,7 @@ public class TemplateService {
             saveFiles(id, newFiles, ownerUserId);
         }
 
+        log.info("Template with id {} was updated", id);
         return templateRepo.save(template);
     }
 
