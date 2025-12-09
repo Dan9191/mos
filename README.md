@@ -29,8 +29,8 @@ https://api.mos-hack.ru/api/swagger-ui/index.html
 
 | Переменная                                | Значение по умолчанию                                   | Описание                                    |
 |-------------------------------------------|---------------------------------------------------------|---------------------------------------------|
-| SERVER_PORT                               | 8080                                                    | Порт сервиса                                |
-| SPRING_APPLICATION_NAME                   | eduinstitution                                          | Имя приложения                              |
+| SERVER_PORT                               | 8091                                                    | Порт сервиса                                |
+| SPRING_APPLICATION_NAME                   | mos                                                     | Имя приложения                              |
 | SPRING_DATASOURCE_URL                     | jdbc:postgresql://localhost:5432/test?currentSchema=mos | URL базы данных PostgreSQL                  |
 | DATASOURCE_NAME                           | test                                                    | Пользователь базы данных                    |
 | DATASOURCE_PASSWORD                       | test                                                    | Пароль базы данных                          |
