@@ -21,4 +21,3 @@ CREATE INDEX idx_chat_message_created ON chat_message(order_id, created_at DESC)
 
 -- Индексы для таблицы web_camera
 CREATE INDEX idx_web_camera_order ON web_camera(order_id);
-CREATE INDEX idx_web_camera_status ON web_camera(is_active, status);

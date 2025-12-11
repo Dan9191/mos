@@ -40,8 +40,7 @@ CREATE TABLE chat_message (
                               order_id    BIGINT NOT NULL REFERENCES orders(id),
                               user_id     UUID NOT NULL REFERENCES "user"(id),
                               message     TEXT NOT NULL,
-                              created_at  TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-                              document_id BIGINT REFERENCES document(id)
+                              created_at  TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 COMMENT ON TABLE chat_message IS 'Сообщения в чате по заказу';
@@ -50,36 +49,19 @@ COMMENT ON COLUMN chat_message.order_id IS 'ID заказа';
 COMMENT ON COLUMN chat_message.user_id IS 'ID пользователя';
 COMMENT ON COLUMN chat_message.message IS 'Текст сообщения';
 COMMENT ON COLUMN chat_message.created_at IS 'Дата отправки сообщения';
-COMMENT ON COLUMN chat_message.document_id IS 'Прикрепленный документ';
 
 -- Веб-камеры
 CREATE TABLE web_camera (
                             id          BIGSERIAL PRIMARY KEY,
                             order_id    BIGINT NOT NULL REFERENCES orders(id),
                             name        VARCHAR(128) NOT NULL,
-                            description TEXT,
                             ip_address  VARCHAR(45) NOT NULL,
-                            port        INTEGER,
-                            stream_url  VARCHAR(512),
-                            login       VARCHAR(64),
-                            password    VARCHAR(128),
-                            is_active   BOOLEAN DEFAULT TRUE,
-                            location    VARCHAR(256),
-                            last_check  TIMESTAMP WITH TIME ZONE,
-                            status      VARCHAR(20) DEFAULT 'offline'
+                            port        INTEGER
 );
 
 COMMENT ON TABLE web_camera IS 'Веб-камеры на объектах строительства';
 COMMENT ON COLUMN web_camera.id IS 'Идентификатор камеры';
 COMMENT ON COLUMN web_camera.order_id IS 'ID заказа';
 COMMENT ON COLUMN web_camera.name IS 'Название камеры';
-COMMENT ON COLUMN web_camera.description IS 'Описание камеры';
 COMMENT ON COLUMN web_camera.ip_address IS 'IP-адрес камеры';
 COMMENT ON COLUMN web_camera.port IS 'Порт камеры';
-COMMENT ON COLUMN web_camera.stream_url IS 'URL видеопотока';
-COMMENT ON COLUMN web_camera.login IS 'Логин для доступа';
-COMMENT ON COLUMN web_camera.password IS 'Пароль для доступа';
-COMMENT ON COLUMN web_camera.is_active IS 'Активна ли камера';
-COMMENT ON COLUMN web_camera.location IS 'Расположение камеры';
-COMMENT ON COLUMN web_camera.last_check IS 'Последняя проверка соединения';
-COMMENT ON COLUMN web_camera.status IS 'Статус камеры (online, offline, error)';
