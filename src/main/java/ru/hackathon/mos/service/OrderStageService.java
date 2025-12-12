@@ -7,11 +7,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.hackathon.mos.dto.order.OrderStageDTO;
-import ru.hackathon.mos.entity.*;
+import ru.hackathon.mos.entity.Order;
+import ru.hackathon.mos.entity.OrderStage;
+import ru.hackathon.mos.entity.OrderStageType;
+import ru.hackathon.mos.entity.User;
 import ru.hackathon.mos.exception.NotFoundException;
 import ru.hackathon.mos.exception.ValidationException;
 import ru.hackathon.mos.mapper.OrderMapper;
-import ru.hackathon.mos.repository.*;
+import ru.hackathon.mos.repository.OrderRepository;
+import ru.hackathon.mos.repository.OrderStageRepository;
+import ru.hackathon.mos.repository.OrderStageTypeRepository;
+import ru.hackathon.mos.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -61,7 +67,8 @@ public class OrderStageService {
      * Создать этап строительства
      */
     @Transactional
-    public OrderStageDTO createOrderStage(Long orderId, UUID userId,
+    public OrderStageDTO createOrderStage(Long orderId,
+                                          UUID userId,
                                           OrderStageDTO.CreateStageRequest request) {
         log.info("Создание этапа для заказа ID: {}", orderId);
 
@@ -103,7 +110,8 @@ public class OrderStageService {
      * Обновить этап строительства
      */
     @Transactional
-    public OrderStageDTO updateOrderStage(Long stageId, UUID userId,
+    public OrderStageDTO updateOrderStage(Long stageId,
+                                          UUID userId,
                                           OrderStageDTO.UpdateStageRequest request) {
         log.info("Обновление этапа ID: {}", stageId);
 

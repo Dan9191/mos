@@ -18,18 +18,18 @@ public class OrderStatus {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "orderId", nullable = false)
+    @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "typeId", nullable = false)
+    @JoinColumn(name = "type_id", nullable = false)
     private OrderStatusType type;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "statusChangedBy", nullable = false)
+    @JoinColumn(name = "status_changed_by", nullable = false)
     private User changedBy;
 
-    @Column(name = "createdAt", nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @PrePersist

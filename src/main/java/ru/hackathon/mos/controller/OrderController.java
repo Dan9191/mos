@@ -12,14 +12,22 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.*;
-import ru.hackathon.mos.dto.order.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import ru.hackathon.mos.dto.common.ListResponse;
-import ru.hackathon.mos.dto.order.*;
+import ru.hackathon.mos.dto.order.CreateOrderRequest;
+import ru.hackathon.mos.dto.order.OrderDTO;
+import ru.hackathon.mos.dto.order.OrderStageDTO;
+import ru.hackathon.mos.dto.order.OrderStatusDTO;
 import ru.hackathon.mos.service.OrderService;
 import ru.hackathon.mos.service.OrderStageService;
 import ru.hackathon.mos.service.OrderStatusService;
-import ru.hackathon.mos.dto.order.OrderDTO;
 
 import java.util.UUID;
 

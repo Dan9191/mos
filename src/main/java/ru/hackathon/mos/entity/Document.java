@@ -20,11 +20,11 @@ public class Document {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "orderId", nullable = false)
+    @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "typeId", nullable = false)
+    @JoinColumn(name = "type_id", nullable = false)
     private DocumentType type;
 
     @Column(name = "title", nullable = false, length = 256)
@@ -33,10 +33,10 @@ public class Document {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "createdAt", nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "fileEntityId")
+    @Column(name = "file_entity_id")
     private Long fileEntityId;
 
     @Column(name = "status", length = 50)
