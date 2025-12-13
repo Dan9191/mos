@@ -7,8 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.hackathon.mos.dto.webcamera.WebCameraRequest;
-import ru.hackathon.mos.dto.webcamera.WebCameraResponse;
+import ru.hackathon.mos.dto.webCamera.WebCameraRequest;
+import ru.hackathon.mos.dto.webCamera.WebCameraResponse;
 import ru.hackathon.mos.service.WebCameraService;
 
 import java.util.List;
