@@ -1,4 +1,4 @@
-package ru.hackathon.mos.exception.order;
+package ru.hackathon.mos.exception;
 
 import ru.hackathon.mos.exception.NotFoundException;
 
