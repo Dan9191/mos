@@ -1,6 +1,7 @@
 package ru.hackathon.mos.dto.application;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,36 +19,37 @@ import java.util.UUID;
 @Schema(description = "Детальная информация о заявке")
 public class ApplicationDetailsDto {
 
+    @NotNull
     @Schema(description = "Идентификатор заявки", example = "12345")
     private Long id;
 
-    /** UUID пользователя, который создал заявку */
+
+    @NotNull
     @Schema(description = "UUID пользователя, создавшего заявку",
             example = "a1b2c3d4-e5f6-7890-abcd-ef1234567890")
     private UUID creatorId;
 
-    /** ID проекта/шаблона */
+    @NotNull
     @Schema(description = "Идентификатор проекта/шаблона", example = "100")
     private Long projectId;
 
-    /** Кодовое имя статуса заявки (например, created, accepted) */
+    @NotNull
     @Schema(description = "Кодовое имя статуса заявки",
             example = "created",
             allowableValues = {"created", "consideration", "accepted", "rejected"})
     private String statusName;
 
-    /** Описание статуса заявки */
+    @NotNull
     @Schema(description = "Описание статуса заявки",
             example = "Заявка создана.")
     private String statusDescription;
 
-    /** UUID менеджера, который рассматривает заявку (nullable) */
     @Schema(description = "UUID менеджера, рассматривающего заявку",
             example = "b2c3d4e5-f6a7-8901-bcde-f23456789012",
             nullable = true)
     private UUID managerId;
 
-    /** Дата и время создания заявки */
+    @NotNull
     @Schema(description = "Дата и время создания заявки в формате ISO 8601",
             example = "2024-12-15T10:30:00Z")
     private Instant createdAt;

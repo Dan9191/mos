@@ -21,7 +21,7 @@ import ru.hackathon.mos.service.ApplicationService;
 @RestController
 @RequestMapping("/api/applications")
 @RequiredArgsConstructor
-@Tag(name = "Заявки", description = "Управление заявками на строительства")
+@Tag(name = "Заявки", description = "Управление заявками на строительство")
 public class ApplicationController {
 
     private final ApplicationService applicationService;
