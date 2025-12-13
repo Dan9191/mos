@@ -32,7 +32,7 @@ public class ChatMessageService {
     public ChatMessageDto sendMessage(Long orderId, String message) {
 //        var orderDTO = orderService.getOrderById(orderId);
         Order order = new Order(); // TODO: Найти order по orderId
-        User user = new User(); // TODO: Из SecurityContext
+        User user = new User(); // TODO: Из JWT-токена
 
         ChatMessage chatMessage = ChatMessage.builder()
                 .order(order)
@@ -49,9 +49,9 @@ public class ChatMessageService {
     private ChatMessageDto convertToDto(ChatMessage chatMessage) {
         return ChatMessageDto.builder()
                 .id(chatMessage.getId())
-                .userId(1L) // TODO: Из SecurityContext
-                .userName("Тестовый пользователь")  // TODO: Из SecurityContext
-                .userRole("client")  // TODO: Из SecurityContext
+                .userId(1L) // TODO: Из JWT-токена
+                .userName("Тестовый пользователь")  // TODO: Из JWT-токена
+                .userRole("client")  // TODO: Из JWT-токена
                 .message(chatMessage.getMessage())
                 .createdAt(chatMessage.getCreatedAt())
                 .build();
