@@ -1,6 +1,6 @@
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
-CREATE TABLE project_template (
+CREATE TABLE IF NOT EXISTS project_template (
                                   id          BIGSERIAL PRIMARY KEY,
                                   title       VARCHAR(256) NOT NULL,
                                   description TEXT,
@@ -26,7 +26,7 @@ COMMENT ON COLUMN project_template.created_at             IS 'Дата и вре
 COMMENT ON COLUMN project_template.updated_at             IS 'Дата и время последнего обновления';
 
 
-CREATE TABLE file_entity (
+CREATE TABLE IF NOT EXISTS file_entity (
                              id             BIGSERIAL PRIMARY KEY,
                              owner_type     VARCHAR(50)  NOT NULL,
                              owner_id       BIGINT       NOT NULL,

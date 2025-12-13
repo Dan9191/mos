@@ -4,14 +4,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+import ru.hackathon.mos.dto.UserTypeEnum;
 import ru.hackathon.mos.entity.User;
 import ru.hackathon.mos.entity.UserType;
+import ru.hackathon.mos.exception.NotFoundException;
 import ru.hackathon.mos.repository.UserRepository;
 import ru.hackathon.mos.repository.UserTypeRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+
+import static ru.hackathon.mos.dto.UserTypeEnum.ADMIN;
+import static ru.hackathon.mos.dto.UserTypeEnum.MANAGER;
+import static ru.hackathon.mos.dto.UserTypeEnum.USER;
 
 /**
  * Сервис работы с пользователями.
@@ -42,18 +48,12 @@ public class UserService {
 
         UUID userId = UUID.fromString(jwt.getSubject());
         String email = jwt.getClaimAsString("email");
-        String role = extractRole(jwt);
+        UserTypeEnum userTypeEnum = extractRole(jwt);
         String firstName = jwt.getClaimAsString("given_name");
         String lastName = jwt.getClaimAsString("family_name");
 
-        UserType userType = userTypeRepository.findByName(role)
-                .orElseGet(() -> {
-                    UserType ut = new UserType();
-                    ut.setName(role);
-                    userTypeRepository.save(ut);
-                    log.info("A user type with role '{}' was created.", role);
-                    return ut;
-                });
+        UserType userType = userTypeRepository.findById(userTypeEnum.getId())
+                .orElseThrow(() -> new NotFoundException("user_type", (long) userTypeEnum.getId()));
 
         User user = userRepository.findById(userId)
                 .orElseGet(() -> {
@@ -97,11 +97,11 @@ public class UserService {
      * @param jwt Jwt токен.
      * @return роль.
      */
-    private String extractRole(Jwt jwt) {
+    private UserTypeEnum extractRole(Jwt jwt) {
         List<String> roles = jwt.getClaim("roles");
 
-        if (roles.contains("ROLE_hackathon.admin")) return "Администратор";
-        if (roles.contains("ROLE_hackathon.manager")) return "Менеджер";
-        return "Пользователь";
+        if (roles.contains(ADMIN.getRole())) return ADMIN;
+        if (roles.contains(MANAGER.getRole())) return MANAGER;
+        return USER;
     }
 }

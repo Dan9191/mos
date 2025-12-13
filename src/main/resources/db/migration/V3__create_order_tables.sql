@@ -1,7 +1,8 @@
 -- Таблица заказов
-CREATE TABLE orders (
+CREATE TABLE IF NOT EXISTS orders (
                         id          BIGSERIAL PRIMARY KEY,
                         client_id   UUID NOT NULL REFERENCES "user"(id),
+                        manager_id  UUID REFERENCES "user"(id),
                         project_id  BIGINT NOT NULL REFERENCES project_template(id),
                         address     VARCHAR(500) NOT NULL,
                         created_at  TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -10,12 +11,13 @@ CREATE TABLE orders (
 COMMENT ON TABLE orders IS 'Заказы на строительство';
 COMMENT ON COLUMN orders.id IS 'Идентификатор заказа';
 COMMENT ON COLUMN orders.client_id IS 'ID клиента (ссылка на user)';
+COMMENT ON COLUMN orders.client_id IS 'ID менеджера (ссылка на user)';
 COMMENT ON COLUMN orders.project_id IS 'ID выбранного шаблона проекта';
 COMMENT ON COLUMN orders.address IS 'Адрес строительства';
 COMMENT ON COLUMN orders.created_at IS 'Дата создания заказа';
 
 -- Типы статусов заказа
-CREATE TABLE order_status_type (
+CREATE TABLE IF NOT EXISTS order_status_type (
                                    id          BIGSERIAL PRIMARY KEY,
                                    name        VARCHAR(50) NOT NULL UNIQUE,
                                    description TEXT
@@ -27,12 +29,12 @@ COMMENT ON COLUMN order_status_type.name IS 'Название статуса';
 COMMENT ON COLUMN order_status_type.description IS 'Описание статуса';
 
 -- Статусы заказа
-CREATE TABLE order_status (
-                              id              BIGSERIAL PRIMARY KEY,
-                              order_id        BIGINT NOT NULL REFERENCES orders(id),
-                              type_id         BIGINT NOT NULL REFERENCES order_status_type(id),
+CREATE TABLE IF NOT EXISTS order_status (
+                              id                BIGSERIAL PRIMARY KEY,
+                              order_id          BIGINT NOT NULL REFERENCES orders(id),
+                              type_id           BIGINT NOT NULL REFERENCES order_status_type(id),
                               status_changed_by UUID NOT NULL REFERENCES "user"(id),
-                              created_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                              created_at        TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 COMMENT ON TABLE order_status IS 'История статусов заказа';
@@ -43,7 +45,7 @@ COMMENT ON COLUMN order_status.status_changed_by IS 'Кто изменил ст�
 COMMENT ON COLUMN order_status.created_at IS 'Дата изменения статуса';
 
 -- Типы этапов строительства
-CREATE TABLE order_stage_type (
+CREATE TABLE IF NOT EXISTS order_stage_type (
                                   id            BIGSERIAL PRIMARY KEY,
                                   name          VARCHAR(50) NOT NULL UNIQUE,
                                   description   TEXT,
@@ -59,7 +61,7 @@ COMMENT ON COLUMN order_stage_type.is_mandatory IS 'Обязательный л�
 COMMENT ON COLUMN order_stage_type.display_order IS 'Порядок отображения';
 
 -- Этапы строительства
-CREATE TABLE order_stage (
+CREATE TABLE IF NOT EXISTS order_stage (
                              id                BIGSERIAL PRIMARY KEY,
                              order_id          BIGINT NOT NULL REFERENCES orders(id),
                              type_id           BIGINT NOT NULL REFERENCES order_stage_type(id),

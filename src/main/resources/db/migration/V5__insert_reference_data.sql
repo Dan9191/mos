@@ -1,10 +1,3 @@
--- Вставка типов пользователей
-INSERT INTO user_type (name, description) VALUES
-                                              ('Пользователь', 'Обычный пользователь системы'),
-                                              ('Менеджер', 'Менеджер строительной компании'),
-                                              ('Администратор', 'Администратор системы')
-    ON CONFLICT DO NOTHING;
-
 -- Вставка типов статусов заказа
 INSERT INTO order_status_type (name, description) VALUES
                                                       ('new', 'Новый заказ'),
@@ -12,7 +5,7 @@ INSERT INTO order_status_type (name, description) VALUES
                                                       ('construction', 'Строительство'),
                                                       ('completion', 'Завершение работ'),
                                                       ('closed', 'Заказ закрыт')
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (name) DO NOTHING;
 
 -- Вставка типов этапов строительства
 INSERT INTO order_stage_type (name, description, is_mandatory, display_order) VALUES
@@ -23,7 +16,7 @@ INSERT INTO order_stage_type (name, description, is_mandatory, display_order) VA
                                                                                   ('electrical', 'Электромонтажные работы', FALSE, 5),
                                                                                   ('plumbing', 'Сантехнические работы', FALSE, 6),
                                                                                   ('landscaping', 'Благоустройство территории', FALSE, 7)
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (name) DO NOTHING;
 
 -- Вставка типов документов
 INSERT INTO document_type (name, description) VALUES
@@ -33,4 +26,4 @@ INSERT INTO document_type (name, description) VALUES
                                                   ('acceptance_certificate', 'Акт приема-передачи'),
                                                   ('permit', 'Разрешительная документация'),
                                                   ('technical_documentation', 'Техническая документация')
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (name) DO NOTHING;

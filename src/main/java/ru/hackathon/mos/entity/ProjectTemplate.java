@@ -29,32 +29,37 @@ public class ProjectTemplate {
      * Название шаблона, отображается в карточке.
      * Пример: "Минимализм 120 м²"
      */
-    @Column(nullable = false, length = 256)
+    @Column(nullable = false, length = 256, name = "title")
     private String title;
 
     /**
      * Подробное описание проекта.
      */
+    @Column(name = "description")
     private String description;
 
     /**
      * Базовая стоимость строительства.
      */
+    @Column(name = "base_price")
     private BigDecimal basePrice;
 
     /**
      * Общая площадь дома в м².
      */
+    @Column(name = "area_m2")
     private Double areaM2;
 
     /**
      * Количество комнат.
      */
+    @Column(name = "rooms")
     private Integer rooms;
 
     /**
      * Архитектурный стиль: минимализм, сканди, классика и т.д.
      */
+    @Column(name = "style")
     private String style;
 
     /**

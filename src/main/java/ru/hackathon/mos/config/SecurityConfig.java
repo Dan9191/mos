@@ -48,6 +48,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/templates/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/templates/**").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
                         .requestMatchers(HttpMethod.PUT, "/api/templates/**").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
+                        .requestMatchers(HttpMethod.POST, "/api/applications").hasAuthority("ROLE_hackathon.user")
+                        // блок операций по заявкам
+                        .requestMatchers(HttpMethod.POST, "/api/applications/*/take").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
+                        .requestMatchers(HttpMethod.POST, "/api/applications/*/reject").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
+                        .requestMatchers(HttpMethod.POST, "/api/applications/*/accept").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
+                        // тестовые запросы
                         .requestMatchers("/api/v1/events/**").hasAuthority("ROLE_hackathon.admin")
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers(

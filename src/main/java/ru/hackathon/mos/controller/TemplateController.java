@@ -3,6 +3,7 @@ package ru.hackathon.mos.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +36,7 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/api/templates")
 @RequiredArgsConstructor
+@Tag(name = "Шаблоны проектов", description = "Управление шаблонами")
 public class TemplateController {
 
     /**

@@ -1,5 +1,5 @@
 -- Типы документов
-CREATE TABLE document_type (
+CREATE TABLE IF NOT EXISTS document_type (
                                id          BIGSERIAL PRIMARY KEY,
                                name        VARCHAR(50) NOT NULL UNIQUE,
                                description TEXT
@@ -11,7 +11,7 @@ COMMENT ON COLUMN document_type.name IS 'Название типа докуме�
 COMMENT ON COLUMN document_type.description IS 'Описание типа документа';
 
 -- Документы
-CREATE TABLE document (
+CREATE TABLE IF NOT EXISTS document (
                           id            BIGSERIAL PRIMARY KEY,
                           order_id      BIGINT NOT NULL REFERENCES orders(id),
                           type_id       BIGINT NOT NULL REFERENCES document_type(id),
@@ -35,7 +35,7 @@ COMMENT ON COLUMN document.status IS 'Статус документа (draft, se
 COMMENT ON COLUMN document.version IS 'Версия документа';
 
 -- Сообщения чата
-CREATE TABLE chat_message (
+CREATE TABLE IF NOT EXISTS chat_message (
                               id          BIGSERIAL PRIMARY KEY,
                               order_id    BIGINT NOT NULL REFERENCES orders(id),
                               user_id     UUID NOT NULL REFERENCES "user"(id),
@@ -51,7 +51,7 @@ COMMENT ON COLUMN chat_message.message IS 'Текст сообщения';
 COMMENT ON COLUMN chat_message.created_at IS 'Дата отправки сообщения';
 
 -- Веб-камеры
-CREATE TABLE web_camera (
+CREATE TABLE IF NOT EXISTS web_camera (
                             id          BIGSERIAL PRIMARY KEY,
                             order_id    BIGINT NOT NULL REFERENCES orders(id),
                             name        VARCHAR(128) NOT NULL,
