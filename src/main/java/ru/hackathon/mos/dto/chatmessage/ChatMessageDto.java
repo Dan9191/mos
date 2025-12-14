@@ -1,10 +1,11 @@
-package ru.hackathon.mos.dto.chatMessage;
+package ru.hackathon.mos.dto.chatmessage;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Builder
 public record ChatMessageDto(
@@ -13,7 +14,7 @@ public record ChatMessageDto(
         Long id,
 
         @JsonProperty("userId")
-        Long userId,
+        UUID userId,
 
         @JsonProperty("userName")
         String userName,

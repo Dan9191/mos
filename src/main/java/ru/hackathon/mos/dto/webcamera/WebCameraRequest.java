@@ -1,4 +1,4 @@
-package ru.hackathon.mos.dto.webCamera;
+package ru.hackathon.mos.dto.webcamera;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;

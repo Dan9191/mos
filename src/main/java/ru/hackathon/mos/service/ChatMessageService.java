@@ -4,22 +4,27 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.hackathon.mos.dto.chatMessage.ChatMessageDto;
+import ru.hackathon.mos.dto.chatmessage.ChatMessageDto;
 import ru.hackathon.mos.entity.ChatMessage;
 import ru.hackathon.mos.entity.Order;
 import ru.hackathon.mos.entity.User;
+import ru.hackathon.mos.exception.OrderNotFoundException;
+import ru.hackathon.mos.exception.UserNotFoundException;
 import ru.hackathon.mos.repository.ChatMessageRepository;
+import ru.hackathon.mos.repository.OrderRepository;
+import ru.hackathon.mos.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ChatMessageService {
-
     private final ChatMessageRepository chatMessageRepository;
-    private final OrderService orderService;
+    private final OrderRepository orderRepository;
+    private final UserRepository userRepository;
 
     public List<ChatMessageDto> getChatMessagesByOrderId(Long orderId) {
         List<ChatMessage> messages = chatMessageRepository.findByOrderIdOrderByCreatedAtAsc(orderId);
@@ -29,10 +34,11 @@ public class ChatMessageService {
     }
 
     @Transactional
-    public ChatMessageDto sendMessage(Long orderId, String message) {
-//        var orderDTO = orderService.getOrderById(orderId);
-        Order order = new Order(); // TODO: Найти order по orderId
-        User user = new User(); // TODO: Из JWT-токена
+    public ChatMessageDto sendMessage(UUID userId, Long orderId, String message) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Пользователь с id = " + userId + " не найден."));
 
         ChatMessage chatMessage = ChatMessage.builder()
                 .order(order)
@@ -47,11 +53,14 @@ public class ChatMessageService {
     }
 
     private ChatMessageDto convertToDto(ChatMessage chatMessage) {
+        var user = chatMessage.getUser();
+        var userFullName = user.getLastName() + " " + user.getFirstName() + " " + user.getMiddleName();
+
         return ChatMessageDto.builder()
                 .id(chatMessage.getId())
-                .userId(1L) // TODO: Из JWT-токена
-                .userName("Тестовый пользователь")  // TODO: Из JWT-токена
-                .userRole("client")  // TODO: Из JWT-токена
+                .userId(user.getId())
+                .userName(userFullName)
+                .userRole(user.getType().getName())
                 .message(chatMessage.getMessage())
                 .createdAt(chatMessage.getCreatedAt())
                 .build();
