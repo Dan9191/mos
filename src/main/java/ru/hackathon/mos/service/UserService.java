@@ -1,10 +1,17 @@
 package ru.hackathon.mos.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import ru.hackathon.mos.dto.UserTypeEnum;
+import ru.hackathon.mos.dto.user.UpdateUserRequest;
+import ru.hackathon.mos.dto.user.UserTypeViewDto;
+import ru.hackathon.mos.dto.user.UserViewDto;
 import ru.hackathon.mos.entity.User;
 import ru.hackathon.mos.entity.UserType;
 import ru.hackathon.mos.exception.NotFoundException;
@@ -44,6 +51,7 @@ public class UserService {
      * @param jwt Jwt токен.
      * @return данные пользователя.
      */
+    @Transactional
     public User findOrCreateFromJwt(Jwt jwt) {
 
         UUID userId = UUID.fromString(jwt.getSubject());
@@ -55,7 +63,7 @@ public class UserService {
         UserType userType = userTypeRepository.findById(userTypeEnum.getId())
                 .orElseThrow(() -> new NotFoundException("user_type", (long) userTypeEnum.getId()));
 
-        User user = userRepository.findById(userId)
+        return userRepository.findById(userId)
                 .orElseGet(() -> {
                     User u = new User();
                     u.setId(userId);
@@ -68,27 +76,35 @@ public class UserService {
                     log.info("A user with ID '{}' was created.", userId);
                     return u;
                 });
+    }
 
-        // todo 3. Если данные поменялись → обновить
-//        boolean changed = false;
-//        if (!user.getFirstName().equals(firstName)) {
-//            user.setFirstName(firstName);
-//            changed = true;
-//        }
-//        if (!user.getLastName().equals(lastName)) {
-//            user.setLastName(lastName);
-//            changed = true;
-//        }
-//        if (!user.getType().equals(userType)) {
-//            user.setType(userType);
-//            changed = true;
-//        }
-//
-//        if (changed) {
-//            user = userRepository.save(user);
-//        }
+    /**
+     * Поиск пользователя по ID.
+     *
+     * @param userId ID пользователя.
+     * @return найденный пользователь.
+     */
+    @Transactional
+    public UserViewDto findUserById(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(String.format("user '%s' not exists", userId)));
 
-        return user;
+        UserTypeViewDto userTypeViewDto = UserTypeViewDto.builder()
+                .id(user.getType().getId())
+                .name(user.getType().getName())
+                .description(user.getType().getDescription())
+                .build();
+
+        log.info("A user with ID '{}' has been found.", userId);
+        return UserViewDto.builder()
+                .id(user.getId())
+                .type(userTypeViewDto)
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .surname(user.getMiddleName())
+                .email(user.getEmail())
+                .createdAt(user.getCreatedAt())
+                .build();
     }
 
     /**
@@ -103,5 +119,73 @@ public class UserService {
         if (roles.contains(ADMIN.getRole())) return ADMIN;
         if (roles.contains(MANAGER.getRole())) return MANAGER;
         return USER;
+    }
+
+    /**
+     * Обновление пользователя.
+     *
+     * @param userId  ID пользователя.
+     * @param request Запрос на обновление.
+     * @return обновленная модель.
+     */
+    @Transactional
+    public UserViewDto update(UUID userId, UpdateUserRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(String.format("user '%s' not exists", userId)));
+        UserTypeViewDto userTypeViewDto = UserTypeViewDto.builder()
+                .id(user.getType().getId())
+                .name(user.getType().getName())
+                .description(user.getType().getDescription())
+                .build();
+
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setMiddleName(request.getSurname());
+        user.setEmail(request.getEmail());
+        userRepository.save(user);
+        log.info("A user with ID '{}' has been updated.", userId);
+        return UserViewDto.builder()
+                .id(user.getId())
+                .type(userTypeViewDto)
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .surname(user.getMiddleName())
+                .email(user.getEmail())
+                .createdAt(user.getCreatedAt())
+                .build();
+
+    }
+
+    /**
+     * Получение пагинируемого списка всех пользователей.
+     *
+     * @param pageable Настройки страницы.
+     * @return страница пользователей.
+     */
+    @Transactional
+    public Page<UserViewDto> findAllUsers(Pageable pageable) {
+        Page<User> page = userRepository.findAll(pageable);
+
+        List<UserViewDto> dtos = page.getContent().stream()
+                .map(user -> {
+                    UserTypeViewDto userTypeViewDto = UserTypeViewDto.builder()
+                            .id(user.getType().getId())
+                            .name(user.getType().getName())
+                            .description(user.getType().getDescription())
+                            .build();
+                    return UserViewDto.builder()
+                            .id(user.getId())
+                            .type(userTypeViewDto)
+                            .firstName(user.getFirstName())
+                            .lastName(user.getLastName())
+                            .surname(user.getMiddleName())
+                            .email(user.getEmail())
+                            .createdAt(user.getCreatedAt())
+                            .build();
+                })
+                .toList();
+
+        return new PageImpl<>(dtos, pageable, page.getTotalElements());
+
     }
 }

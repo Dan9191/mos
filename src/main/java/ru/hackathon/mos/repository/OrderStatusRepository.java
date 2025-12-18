@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ru.hackathon.mos.entity.OrderStatus;
-import ru.hackathon.mos.entity.OrderStatusType;
 
 import java.util.List;
 import java.util.Optional;

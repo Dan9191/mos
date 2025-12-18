@@ -2,6 +2,9 @@ package ru.hackathon.mos.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.hackathon.mos.dto.application.ApplicationDetailsDto;
@@ -17,6 +20,7 @@ import ru.hackathon.mos.repository.ProjectTemplateRepository;
 import ru.hackathon.mos.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import static ru.hackathon.mos.dto.ApplicationStatusEnum.ACCEPTED;
@@ -42,6 +46,25 @@ public class ApplicationService {
     private final ProjectTemplateRepository templateRepository;
     private final OrderRepository orderRepository;
 
+
+    /**
+     * Получение страницы с заявками. Заявки отсортированный по дате и статусу.
+     * Порядок статусов created, consideration, accepted, rejected.
+     *
+     * @param pageable Параметры страницы.
+     * @return страница с запросами.
+     */
+    @Transactional
+    public Page<ApplicationDetailsDto> findAllSortByStatus(Pageable pageable) {
+        Page<Application> page = applicationRepository.findAll(pageable);
+
+        List<ApplicationDetailsDto> dtos = page.getContent().stream()
+                .map(ApplicationDetailsDto::new)
+                .toList();
+
+        return new PageImpl<>(dtos, pageable, page.getTotalElements());
+    }
+
     /**
      * Создать заявку. Заявка создается пользователем.
      *
@@ -63,7 +86,7 @@ public class ApplicationService {
         app.setManagerId(null);
         app.setCreatedAt(java.time.Instant.now());
         app.setProjectId(template.getId());
-        log.info("Creating application {}", app);
+        log.info("Creating application {}", app.getId());
         applicationRepository.save(app);
         return new ApplicationDetailsDto(app);
     }
@@ -85,7 +108,7 @@ public class ApplicationService {
 
         app.setManagerId(UUID.fromString(managerUuid));
         app.setStatus(status);
-        log.info("Taking application {}", app);
+        log.info("Taking application {}", app.getId());
         applicationRepository.save(app);
         return new ApplicationDetailsDto(app);
     }
@@ -107,7 +130,7 @@ public class ApplicationService {
 
         app.setManagerId(UUID.fromString(managerUuid));
         app.setStatus(status);
-        log.info("Rejected application {}", app);
+        log.info("Rejected application {}", app.getId());
         applicationRepository.save(app);
         return new ApplicationDetailsDto(app);
     }
@@ -147,8 +170,8 @@ public class ApplicationService {
                 .createdAt(LocalDateTime.now())
                 .build();
         orderRepository.save(order);
-        log.info("Accepted application {}", app);
-        log.info("Order id: '{}' created", savedApp);
+        log.info("Accepted application {}", app.getId());
+        log.info("Order id: '{}' created", savedApp.getId());
         return new ApplicationDetailsDto(savedApp);
     }
 }

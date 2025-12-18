@@ -44,10 +44,13 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: health,metrics,prometheus,readiness,liveness
   endpoint:
     health:
       show-details: always
+  metrics:
+    tags:
+      application: "mos-backend-service"
 
 springdoc:
   api-docs:

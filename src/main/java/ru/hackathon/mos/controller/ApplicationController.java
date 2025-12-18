@@ -5,9 +5,15 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,6 +32,15 @@ public class ApplicationController {
 
     private final ApplicationService applicationService;
 
+    @GetMapping
+    @Operation(summary = "Получить список заявок")
+    public Page<ApplicationDetailsDto> list(
+            @Parameter(description = "Настройки пагинации")
+            @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable) {
+        return applicationService.findAllSortByStatus(pageable);
+    }
+
     @Operation(summary = "Создать заявку")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -38,7 +53,7 @@ public class ApplicationController {
     }
 
     @Operation(summary = "Взять заявку на исполнение")
-    @PostMapping("/{id}/take")
+    @PatchMapping("/{id}/take")
     public ApplicationDetailsDto take(@AuthenticationPrincipal Jwt jwt,
                             @PathVariable Long id) {
         String managerId = jwt.getSubject();
@@ -46,14 +61,14 @@ public class ApplicationController {
     }
 
     @Operation(summary = "Отменить заявку")
-    @PostMapping("/{id}/reject")
+    @PatchMapping("/{id}/reject")
     public ApplicationDetailsDto reject(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
         String managerId = jwt.getSubject();
         return applicationService.rejectApplication(id, managerId);
     }
 
     @Operation(summary = "Принять заявку")
-    @PostMapping("/{id}/accept")
+    @PatchMapping("/{id}/accept")
     public ApplicationDetailsDto accept(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
         String managerId = jwt.getSubject();
         return applicationService.acceptApplication(id, managerId);

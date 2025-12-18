@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
@@ -22,7 +23,7 @@ public class SecurityConfig {
     private final UserSyncFilter userSyncFilter;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http
                 .cors(cors -> cors.configurationSource(request -> {
                     var config = new CorsConfiguration();
@@ -41,18 +42,24 @@ public class SecurityConfig {
                     config.setAllowCredentials(true);
                     return config;
                 }))
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS).permitAll()
                         .requestMatchers("/api/files/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/templates/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/templates/**").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
                         .requestMatchers(HttpMethod.PUT, "/api/templates/**").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
-                        .requestMatchers(HttpMethod.POST, "/api/applications").hasAuthority("ROLE_hackathon.user")
                         // блок операций по заявкам
+                        .requestMatchers(HttpMethod.POST, "/api/applications").hasAuthority("ROLE_hackathon.user")
+                        .requestMatchers(HttpMethod.GET, "/api/applications").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
                         .requestMatchers(HttpMethod.POST, "/api/applications/*/take").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
                         .requestMatchers(HttpMethod.POST, "/api/applications/*/reject").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
                         .requestMatchers(HttpMethod.POST, "/api/applications/*/accept").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
+                        // блок операций по данным пользователя
+                        .requestMatchers(HttpMethod.GET, "/api/users").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
+                        .requestMatchers(HttpMethod.GET, "/api/users/me").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager", "ROLE_hackathon.user")
+                        .requestMatchers(HttpMethod.POST, "/api/users/me").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager", "ROLE_hackathon.user")
+
                         // тестовые запросы
                         .requestMatchers("/api/v1/events/**").hasAuthority("ROLE_hackathon.admin")
                         .requestMatchers("/actuator/**").permitAll()
