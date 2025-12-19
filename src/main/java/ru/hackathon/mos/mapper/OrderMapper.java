@@ -65,7 +65,7 @@ public class OrderMapper {
         dto.setId(orderStage.getId());
         dto.setOrderId(orderStage.getOrder() != null ? orderStage.getOrder().getId() : null);
 
-        // ИСПРАВЛЕННЫЙ КОД - используем getValue() вместо toString()
+        // ИСПРАВЛЕННЫЙ КОД - на toString()
         dto.setStageType(orderStage.getType() != null ?
                 orderStage.getType().getName().getValue() : null);
 
