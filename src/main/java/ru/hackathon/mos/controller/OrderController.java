@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.actuate.web.exchanges.HttpExchange;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -31,6 +33,7 @@ import ru.hackathon.mos.service.OrderStatusService;
 
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor
@@ -93,18 +96,26 @@ public class OrderController {
     }
 
     @PostMapping("/{orderId}/stages")
-    @Operation(summary = "Создать этап строительства",
+    @Operation(summary = "Этапы строительства",
             description = "Создать новый этап строительства")
     public ResponseEntity<OrderStageDTO> createOrderStage(
             @AuthenticationPrincipal Jwt jwt,
             @Parameter(description = "ID заказа") @PathVariable Long orderId,
             @Valid @RequestBody OrderStageDTO.CreateStageRequest request) {
 
-        UUID userId = UUID.fromString(jwt.getSubject());
-        orderService.checkOrderAccess(orderId, userId);
+        log.info("Создание этапа: orderId={}, request={}", orderId, request);
 
-        OrderStageDTO stage = orderStageService.createOrderStage(orderId, userId, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(stage);
+        try {
+            UUID userId = UUID.fromString(jwt.getSubject());
+
+            orderService.checkOrderAccess(orderId, userId);
+
+            OrderStageDTO result = orderStageService.createOrderStage(orderId, userId, request);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Ошибка при создании этапа: ", e);
+            throw e;
+        }
     }
 
     @GetMapping("/{orderId}/status")
