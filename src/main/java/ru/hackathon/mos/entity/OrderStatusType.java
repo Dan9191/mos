@@ -16,11 +16,11 @@ import java.util.List;
 public class OrderStatusType {
 
     public enum StatusName {
-        NEW("new"),
-        DOCUMENTATION("documentation"),
-        CONSTRUCTION("construction"),
-        COMPLETION("completion"),
-        CLOSED("closed");
+        NEW("NEW"),
+        DOCUMENTATION("DOCUMENTATION"),
+        CONSTRUCTION("CONSTRUCTION"),
+        COMPLETION("COMPLETION"),
+        CLOSED("CLOSED");
 
         private final String value;
 
@@ -31,13 +31,28 @@ public class OrderStatusType {
         public String getValue() {
             return value;
         }
+
+        public static StatusName fromValue(String value) {
+            for (StatusName status : values()) {
+                if (status.value.equalsIgnoreCase(value)) {
+                    return status;
+                }
+            }
+            throw new IllegalArgumentException("Неизвестный статус: " + value);
+        }
+
+        // Добавьте этот метод!
+        @Override
+        public String toString() {
+            return this.value;
+        }
     }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)  // Сохраняем как строку в БД
+    @Enumerated(EnumType.STRING)
     @Column(name = "name", nullable = false, unique = true, length = 50)
     private StatusName name;
 

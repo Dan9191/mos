@@ -30,6 +30,22 @@ public class OrderStageType {
         public String getValue() {
             return value;
         }
+
+        // Добавляем метод для преобразования строки в enum
+        public static StageName fromValue(String value) {
+            for (StageName stage : values()) {
+                if (stage.value.equalsIgnoreCase(value)) {
+                    return stage;
+                }
+            }
+            throw new IllegalArgumentException("Неизвестный этап: " + value);
+        }
+
+        // Добавляем toString для возврата строкового значения
+        @Override
+        public String toString() {
+            return this.value;
+        }
     }
 
     @Id

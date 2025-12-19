@@ -64,8 +64,13 @@ public class OrderMapper {
         OrderStageDTO dto = new OrderStageDTO();
         dto.setId(orderStage.getId());
         dto.setOrderId(orderStage.getOrder() != null ? orderStage.getOrder().getId() : null);
-        dto.setStageType(orderStage.getType() != null ? orderStage.getType().getName().toString() : null);
-        dto.setStageName(orderStage.getType() != null ? orderStage.getType().getDescription() : null);
+
+        // ИСПРАВЛЕННЫЙ КОД - используем getValue() вместо toString()
+        dto.setStageType(orderStage.getType() != null ?
+                orderStage.getType().getName().getValue() : null);
+
+        dto.setStageName(orderStage.getType() != null ?
+                orderStage.getType().getDescription() : null);
         dto.setDescription(orderStage.getNotes());
         dto.setProgress(orderStage.getProgress());
         dto.setStatus(toStageStatus(orderStage.getIsCompleted()));
