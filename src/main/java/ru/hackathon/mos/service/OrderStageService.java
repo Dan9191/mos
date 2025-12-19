@@ -7,17 +7,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.hackathon.mos.dto.order.OrderStageDTO;
-import ru.hackathon.mos.entity.Order;
-import ru.hackathon.mos.entity.OrderStage;
-import ru.hackathon.mos.entity.OrderStageType;
-import ru.hackathon.mos.entity.User;
+import ru.hackathon.mos.entity.*;
 import ru.hackathon.mos.exception.NotFoundException;
 import ru.hackathon.mos.exception.ValidationException;
 import ru.hackathon.mos.mapper.OrderMapper;
-import ru.hackathon.mos.repository.OrderRepository;
-import ru.hackathon.mos.repository.OrderStageRepository;
-import ru.hackathon.mos.repository.OrderStageTypeRepository;
-import ru.hackathon.mos.repository.UserRepository;
+import ru.hackathon.mos.repository.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -81,7 +75,8 @@ public class OrderStageService {
         OrderStageType stageType = orderStageTypeRepository.findByName(request.getStageType())
                 .orElseThrow(() -> new ValidationException("Тип этапа не найден"));
 
-        List<OrderStage> existingStages = orderStageRepository.findByOrderIdAndType(orderId, request.getStageType());
+        // ИСПРАВЛЕНО: Используем метод findByOrderIdAndTypeName вместо findByOrderIdAndType
+        List<OrderStage> existingStages = orderStageRepository.findByOrderIdAndTypeName(orderId, request.getStageType());
         boolean hasActiveStage = existingStages.stream().anyMatch(stage -> !stage.getIsCompleted());
 
         if (hasActiveStage) {
@@ -150,6 +145,7 @@ public class OrderStageService {
      * Получить текущий активный этап
      */
     public OrderStageDTO getCurrentStage(Long orderId) {
+        // ИСПРАВЛЕНО: Используем исправленный метод findCurrentStageByOrderId
         OrderStage stage = orderStageRepository.findCurrentStageByOrderId(orderId)
                 .orElseThrow(() -> new NotFoundException("Активный этап не найден"));
 
