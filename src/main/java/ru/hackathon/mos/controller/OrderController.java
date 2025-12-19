@@ -149,13 +149,14 @@ public class OrderController {
     }
 
     @PostMapping
-    @Operation(summary = "Создать заказ", description = "Создать новый заказ")
+    @Operation(summary = "Создать заказ", description = "Создать новый заказ (тестовый метод)")
     public ResponseEntity<OrderDTO> createOrder(
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody CreateOrderRequest request) {
 
         UUID userId = UUID.fromString(jwt.getSubject());
-        OrderDTO order = orderService.createOrder(userId, request);
+        UUID managerId = UUID.fromString(jwt.getSubject());
+        OrderDTO order = orderService.createOrder(userId, managerId,request);
         return ResponseEntity.status(HttpStatus.CREATED).body(order);
     }
 

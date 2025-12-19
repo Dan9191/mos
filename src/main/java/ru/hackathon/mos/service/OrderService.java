@@ -93,7 +93,7 @@ public class OrderService {
      * Создать новый заказ
      */
     @Transactional
-    public OrderDTO createOrder(UUID userId, CreateOrderRequest request) {
+    public OrderDTO createOrder(UUID userId, UUID managerId, CreateOrderRequest request) {
         log.info("Создание заказа для пользователя ID: {}", userId);
 
         User client = userRepository.findById(userId)
@@ -108,6 +108,7 @@ public class OrderService {
 
         Order order = Order.builder()
                 .client(client)
+                .managerId(managerId)
                 .project(project)
                 .address(request.getAddress())
                 .createdAt(LocalDateTime.now())
