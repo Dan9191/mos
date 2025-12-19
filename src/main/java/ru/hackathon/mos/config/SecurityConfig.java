@@ -54,9 +54,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/applications/*/reject").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
                         .requestMatchers(HttpMethod.POST, "/api/applications/*/accept").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
                         //блок операций по заказам
-                        .requestMatchers(HttpMethod.POST, "/api/orders/**").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
-                        .requestMatchers(HttpMethod.GET, "/api/orders/**").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
-                        .requestMatchers(HttpMethod.PATCH, "/api/orders/**").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
+                        .requestMatchers(HttpMethod.POST, "/api/orders/**").hasAnyAuthority("ROLE_hackathon.user", "ROLE_hackathon.admin", "ROLE_hackathon.manager")
+                        .requestMatchers(HttpMethod.GET, "/api/orders/**").hasAnyAuthority("ROLE_hackathon.user", "ROLE_hackathon.admin", "ROLE_hackathon.manager")
+                        .requestMatchers(HttpMethod.PATCH, "/api/orders/**").hasAnyAuthority("ROLE_hackathon.user", "ROLE_hackathon.admin", "ROLE_hackathon.manager")
                         // тестовые запросы
                         .requestMatchers("/api/v1/events/**").hasAuthority("ROLE_hackathon.admin")
                         .requestMatchers("/actuator/**").permitAll()
