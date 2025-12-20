@@ -12,10 +12,16 @@ import java.util.Optional;
 @Repository
 public interface OrderStatusTypeRepository extends JpaRepository<OrderStatusType, Long> {
 
-    Optional<OrderStatusType> findByName(String name);
+    // Исправляем - используем JPQL с UPPER для регистронезависимого поиска
+    @Query("SELECT ost FROM OrderStatusType ost WHERE UPPER(ost.name) = UPPER(:name)")
+    Optional<OrderStatusType> findByName(@Param("name") String name);
 
-    @Query("SELECT ost FROM OrderStatusType ost WHERE ost.name IN :names")
+    // ИСПРАВЛЕННЫЙ метод - убрали вложенный SELECT
+    @Query("SELECT ost FROM OrderStatusType ost WHERE UPPER(ost.name) IN :names")
     List<OrderStatusType> findByNames(@Param("names") List<String> names);
 
-    boolean existsByName(String name);
+    // Исправляем и этот метод
+    @Query("SELECT CASE WHEN COUNT(ost) > 0 THEN true ELSE false END " +
+            "FROM OrderStatusType ost WHERE UPPER(ost.name) = UPPER(:name)")
+    boolean existsByName(@Param("name") String name);
 }

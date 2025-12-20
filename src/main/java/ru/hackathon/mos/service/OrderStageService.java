@@ -81,7 +81,8 @@ public class OrderStageService {
         OrderStageType stageType = orderStageTypeRepository.findByName(request.getStageType())
                 .orElseThrow(() -> new ValidationException("Тип этапа не найден"));
 
-        List<OrderStage> existingStages = orderStageRepository.findByOrderIdAndType(orderId, request.getStageType());
+        // ИСПРАВЛЕНО: Используем метод findByOrderIdAndTypeName вместо findByOrderIdAndType
+        List<OrderStage> existingStages = orderStageRepository.findByOrderIdAndTypeName(orderId, request.getStageType());
         boolean hasActiveStage = existingStages.stream().anyMatch(stage -> !stage.getIsCompleted());
 
         if (hasActiveStage) {
@@ -150,6 +151,7 @@ public class OrderStageService {
      * Получить текущий активный этап
      */
     public OrderStageDTO getCurrentStage(Long orderId) {
+        // ИСПРАВЛЕНО: Используем исправленный метод findCurrentStageByOrderId
         OrderStage stage = orderStageRepository.findCurrentStageByOrderId(orderId)
                 .orElseThrow(() -> new NotFoundException("Активный этап не найден"));
 

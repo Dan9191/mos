@@ -10,12 +10,21 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.hackathon.mos.dto.common.ListResponse;
 import ru.hackathon.mos.dto.order.CreateOrderRequest;
 import ru.hackathon.mos.dto.order.OrderDTO;
-import ru.hackathon.mos.entity.*;
+import ru.hackathon.mos.entity.Order;
+import ru.hackathon.mos.entity.OrderStatus;
+import ru.hackathon.mos.entity.OrderStatusType;
+import ru.hackathon.mos.entity.ProjectTemplate;
+import ru.hackathon.mos.entity.User;
 import ru.hackathon.mos.exception.AccessDeniedException;
 import ru.hackathon.mos.exception.NotFoundException;
 import ru.hackathon.mos.exception.ValidationException;
 import ru.hackathon.mos.mapper.OrderMapper;
-import ru.hackathon.mos.repository.*;
+import ru.hackathon.mos.repository.OrderRepository;
+import ru.hackathon.mos.repository.OrderStageRepository;
+import ru.hackathon.mos.repository.OrderStatusRepository;
+import ru.hackathon.mos.repository.OrderStatusTypeRepository;
+import ru.hackathon.mos.repository.ProjectTemplateRepository;
+import ru.hackathon.mos.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -93,7 +102,7 @@ public class OrderService {
      * Создать новый заказ
      */
     @Transactional
-    public OrderDTO createOrder(UUID userId, CreateOrderRequest request) {
+    public OrderDTO createOrder(UUID userId, UUID managerId, CreateOrderRequest request) {
         log.info("Создание заказа для пользователя ID: {}", userId);
 
         User client = userRepository.findById(userId)
@@ -108,6 +117,7 @@ public class OrderService {
 
         Order order = Order.builder()
                 .client(client)
+                .managerId(managerId)
                 .project(project)
                 .address(request.getAddress())
                 .createdAt(LocalDateTime.now())
