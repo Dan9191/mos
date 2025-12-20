@@ -56,12 +56,13 @@ public class ApplicationService {
      */
     @Transactional
     public Page<ApplicationDetailsDto> findAllSortByStatus(Pageable pageable) {
-        Page<Application> page = applicationRepository.findAll(pageable);
+        Page<Application> page = applicationRepository.findAllOrderedByStatusAndDate(pageable);
 
         List<ApplicationDetailsDto> dtos = page.getContent().stream()
                 .map(ApplicationDetailsDto::new)
                 .toList();
 
+        log.info("Find all applications ");
         return new PageImpl<>(dtos, pageable, page.getTotalElements());
     }
 
@@ -173,5 +174,43 @@ public class ApplicationService {
         log.info("Accepted application {}", app.getId());
         log.info("Order id: '{}' created", savedApp.getId());
         return new ApplicationDetailsDto(savedApp);
+    }
+
+    /**
+     * Получение страницы с заявками пользователя. Заявки отсортированный по дате и статусу.
+     * Порядок статусов created, consideration, accepted, rejected.
+     *
+     * @param pageable Параметры страницы.
+     * @param userId   ID пользователя.
+     * @return страница с заявками.
+     */
+    public Page<ApplicationDetailsDto> findAllByUserSortByStatus(Pageable pageable, UUID userId) {
+        Page<Application> page = applicationRepository.findAllByCreatorIdOrderedByStatusAndDate(userId, pageable);
+
+        List<ApplicationDetailsDto> dtos = page.getContent().stream()
+                .map(ApplicationDetailsDto::new)
+                .toList();
+
+        log.info("Find all applications by user {}", userId);
+        return new PageImpl<>(dtos, pageable, page.getTotalElements());
+    }
+
+
+    /**
+     * Получение страницы с заявками, курируемые менеджером. Заявки отсортированный по дате и статусу.
+     * Порядок статусов created, consideration, accepted, rejected.
+     *
+     * @param pageable  Параметры страницы.
+     * @param managerId ID пользователя.
+     * @return страница с заявками.
+     */
+    public Page<ApplicationDetailsDto> findAllByManagerSortByStatus(Pageable pageable, UUID managerId) {
+        Page<Application> page = applicationRepository.findAllByManagerIdOrderedByStatusAndDate(managerId, pageable);
+
+        List<ApplicationDetailsDto> dtos = page.getContent().stream()
+                .map(ApplicationDetailsDto::new)
+                .toList();
+        log.info("Find all applications by manager Id {}", managerId);
+        return new PageImpl<>(dtos, pageable, page.getTotalElements());
     }
 }

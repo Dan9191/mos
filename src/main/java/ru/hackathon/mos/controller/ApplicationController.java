@@ -24,6 +24,8 @@ import ru.hackathon.mos.dto.application.ApplicationCreateRequest;
 import ru.hackathon.mos.dto.application.ApplicationDetailsDto;
 import ru.hackathon.mos.service.ApplicationService;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/applications")
 @RequiredArgsConstructor
@@ -39,6 +41,30 @@ public class ApplicationController {
             @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC)
             Pageable pageable) {
         return applicationService.findAllSortByStatus(pageable);
+    }
+
+    @GetMapping("/user")
+    @Operation(summary = "Получить список заявок для пользователя",
+            description = "Доступно обычному пользователю")
+    public Page<ApplicationDetailsDto> listByUser(
+            @Parameter(description = "Настройки пагинации")
+            @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable,
+            @AuthenticationPrincipal Jwt jwt) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        return applicationService.findAllByUserSortByStatus(pageable, userId);
+    }
+
+    @GetMapping("/manager")
+    @Operation(summary = "Получить список курируемых заявок для менеджера",
+            description = "Доступно менеджеру и админу")
+    public Page<ApplicationDetailsDto> listByManager(
+            @Parameter(description = "Настройки пагинации")
+            @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable,
+            @AuthenticationPrincipal Jwt jwt) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        return applicationService.findAllByManagerSortByStatus(pageable, userId);
     }
 
     @Operation(summary = "Создать заявку")
