@@ -33,13 +33,19 @@ public interface OrderStageRepository extends JpaRepository<OrderStage, Long> {
     @Query("SELECT os FROM OrderStage os WHERE os.order.id = :orderId AND os.isCompleted = true ORDER BY os.completionDate DESC")
     List<OrderStage> findCompletedStagesByOrderId(@Param("orderId") Long orderId);
 
+//    /**
+//     * Найти текущий активный этап - ИСПРАВЛЕНО: возвращаем первый результат
+//     **/
+//    default Optional<OrderStage> findCurrentStageByOrderId(Long orderId) {
+//        // Используем встроенный метод Spring Data JPA
+//        return findFirstByOrderIdAndIsCompletedFalseOrderByCreatedAtDesc(orderId);
+//    }
+
     /**
-     * Найти текущий активный этап - ИСПРАВЛЕНО: возвращаем первый результат
+     * Найти текущий активный этап
      **/
-    default Optional<OrderStage> findCurrentStageByOrderId(Long orderId) {
-        // Используем встроенный метод Spring Data JPA
-        return findFirstByOrderIdAndIsCompletedFalseOrderByCreatedAtDesc(orderId);
-    }
+    @Query("SELECT os FROM OrderStage os WHERE os.order.id = :orderId ORDER BY os.createdAt DESC Limit 1")
+    Optional<OrderStage> findCurrentStageByOrderId(@Param("orderId") Long orderId);
 
     /**
      * Найти первый активный этап - Spring Data JPA сгенерирует метод

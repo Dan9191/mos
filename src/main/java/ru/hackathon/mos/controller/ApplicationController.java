@@ -93,7 +93,7 @@ public class ApplicationController {
         return applicationService.rejectApplication(id, managerId);
     }
 
-    @Operation(summary = "Принять заявку")
+    @Operation(summary = "Принять заявку", description = "После утверждения заявки автоматически создается заказ")
     @PatchMapping("/{id}/accept")
     public ApplicationDetailsDto accept(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
         String managerId = jwt.getSubject();
