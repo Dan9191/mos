@@ -160,7 +160,7 @@ public class OrderController {
     }
 
     @PatchMapping("/{orderId}/stages/{stageId}")
-    @Operation(summary = "Обновить этап", description = "Обновить информацию об этапе")
+    @Operation(summary = "Обновить этап", description = "Обновить информацию об этапе (если выбрано completed - этап завершен)")
     public ResponseEntity<OrderStageDTO> updateOrderStage(
             @AuthenticationPrincipal Jwt jwt,
             @Parameter(description = "ID заказа") @PathVariable Long orderId,

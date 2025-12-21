@@ -100,27 +100,7 @@ public class OrderStatusService {
             return orderMapper.toStatusDTO(latestStatus);
         }
 
-        // 6. ПРОВЕРКА 2: Проверяем, был ли такой статус уже в истории заказа
-        boolean statusAlreadyExists = orderStatusRepository.existsByOrderIdAndType(orderId, statusTypeStr);
-
-        if (statusAlreadyExists) {
-            // Получаем последний статус этого типа для логирования
-            List<OrderStatus> sameTypeStatuses = orderStatusRepository.findByOrderIdAndType(orderId, statusTypeStr);
-            if (!sameTypeStatuses.isEmpty()) {
-                OrderStatus lastSameTypeStatus = sameTypeStatuses.stream()
-                        .max((s1, s2) -> s1.getCreatedAt().compareTo(s2.getCreatedAt()))
-                        .orElse(null);
-
-                if (lastSameTypeStatus != null) {
-                    throw new ValidationException(
-                            String.format("Статус '%s' уже существует в истории заказа. " +
-                                            "Последний раз был установлен: %s",
-                                    request.getStatusType(), lastSameTypeStatus.getCreatedAt()));
-                }
-            }
-        }
-
-        // 7. СОЗДАНИЕ нового статуса
+        // 6. СОЗДАНИЕ нового статуса
         OrderStatus orderStatus = new OrderStatus();
         orderStatus.setOrder(order);
         orderStatus.setType(statusType);
