@@ -55,6 +55,7 @@ public class UserService {
     public User findOrCreateFromJwt(Jwt jwt) {
 
         UUID userId = UUID.fromString(jwt.getSubject());
+        String login = jwt.getClaim("preferred_username");
         String email = jwt.getClaimAsString("email");
         UserTypeEnum userTypeEnum = extractRole(jwt);
         String firstName = jwt.getClaimAsString("given_name");
@@ -66,6 +67,7 @@ public class UserService {
         return userRepository.findById(userId)
                 .orElseGet(() -> {
                     User u = new User();
+                    u.setUsername(login);
                     u.setId(userId);
                     u.setEmail(email);
                     u.setFirstName(firstName);
@@ -76,6 +78,35 @@ public class UserService {
                     log.info("A user with ID '{}' was created.", userId);
                     return u;
                 });
+    }
+
+    /**
+     * Создание пользователя в БД.
+     *
+     * @param userId    ID пользователя.
+     * @param username  Логин пользователя
+     * @param email     Почта пользователя.
+     * @param firstName Имя пользователя.
+     * @param lastName  Фамилия пользователя.
+     */
+    @Transactional
+    public void createUser(UUID userId, String username, String email, String firstName, String lastName) {
+
+        UserType userType = userTypeRepository.findById(USER.getId())
+                .orElseThrow(() -> new NotFoundException("user_type", (long) USER.getId()));
+
+        User user = User.builder()
+                .id(userId)
+                .username(username)
+                .type(userType)
+                .email(email)
+                .firstName(firstName)
+                .middleName(lastName)
+                .createdAt(LocalDateTime.now())
+                .build();
+        userRepository.save(user);
+
+        log.info("A user with ID '{}' has been created.", user.getId());
     }
 
     /**
@@ -98,6 +129,7 @@ public class UserService {
         log.info("A user with ID '{}' has been found.", userId);
         return UserViewDto.builder()
                 .id(user.getId())
+                .username(user.getUsername())
                 .type(userTypeViewDto)
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
@@ -146,6 +178,7 @@ public class UserService {
         log.info("A user with ID '{}' has been updated.", userId);
         return UserViewDto.builder()
                 .id(user.getId())
+                .username(user.getUsername())
                 .type(userTypeViewDto)
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
@@ -175,6 +208,7 @@ public class UserService {
                             .build();
                     return UserViewDto.builder()
                             .id(user.getId())
+                            .username(user.getUsername())
                             .type(userTypeViewDto)
                             .firstName(user.getFirstName())
                             .lastName(user.getLastName())

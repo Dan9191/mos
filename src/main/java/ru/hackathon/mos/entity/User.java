@@ -32,6 +32,9 @@ public class User {
     @JoinColumn(name = "type_id", nullable = false)
     private UserType type;
 
+    @Column(name = "username", length = 128, nullable = false, unique = true)
+    private String username;
+
     @Column(name = "first_name", length = 128, nullable = false)
     private String firstName;
 

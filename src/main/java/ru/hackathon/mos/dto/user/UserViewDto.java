@@ -13,27 +13,30 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Данные пользователя.")
+@Schema(description = "Данные пользователя")
 public class UserViewDto {
 
-    @Schema(description = "ID пользователя.")
+    @Schema(description = "ID пользователя")
     private UUID id;
 
-    @Schema(description = "Тип пользователя.")
+    @Schema(description = "Тип пользователя")
     private UserTypeViewDto type;
 
-    @Schema(description = "Имя.")
+    @Schema(description = "Логин")
+    private String username;
+
+    @Schema(description = "Имя")
     private String firstName;
 
-    @Schema(description = "Фамилия.")
+    @Schema(description = "Фамилия")
     private String lastName;
 
-    @Schema(description = "Отчество.")
+    @Schema(description = "Отчество")
     private String surname;
 
-    @Schema(description = "Почта пользователя.")
+    @Schema(description = "Почта пользователя")
     private String email;
 
-    @Schema(description = "Время создания пользователя.")
+    @Schema(description = "Время создания пользователя")
     private LocalDateTime createdAt;
 }

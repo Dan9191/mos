@@ -10,19 +10,19 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Модель для обновления пользователя.")
+@Schema(description = "Модель для обновления пользователя")
 public class UpdateUserRequest {
 
-    @Schema(description = "Имя.")
+    @Schema(description = "Имя")
     private String firstName;
 
-    @Schema(description = "Фамилия.")
+    @Schema(description = "Фамилия")
     private String lastName;
 
-    @Schema(description = "Отчество.")
+    @Schema(description = "Отчество")
     private String surname;
 
-    @Schema(description = "Почта пользователя.")
+    @Schema(description = "Почта пользователя")
     private String email;
 
 }

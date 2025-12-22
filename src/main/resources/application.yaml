@@ -39,6 +39,11 @@ spring:
 app:
   upload:
     base-url: ${UPLOAD_BASE_URL:http://localhost:8091/api/files}
+  keycloak:
+    server-url: ${KEYCLOAK_URL:http://localhost:9090}
+    realm: ${KEYCLOAK_REALM:hackathon}
+    admin-client-id: ${KEYCLOAK_ADMIN_CLIENT}
+    admin-client-secret: ${KEYCLOAK_ADMIN_SECRET}
 
 management:
   endpoints:
