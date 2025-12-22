@@ -101,7 +101,7 @@ public class UserService {
                 .type(userType)
                 .email(email)
                 .firstName(firstName)
-                .middleName(lastName)
+                .lastName(lastName)
                 .createdAt(LocalDateTime.now())
                 .build();
         userRepository.save(user);
