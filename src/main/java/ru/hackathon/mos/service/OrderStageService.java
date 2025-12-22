@@ -64,13 +64,13 @@ public class OrderStageService {
     }
 
     /**
-     * Создать этап строительства
+     * Создать этап строительства с полной идемпотентностью
      */
     @Transactional
     public OrderStageDTO createOrderStage(Long orderId,
                                           UUID userId,
                                           OrderStageDTO.CreateStageRequest request) {
-        log.info("Создание этапа для заказа ID: {}", orderId);
+        log.info("Создание этапа для заказа ID: {}, тип: {}", orderId, request.getStageType());
 
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Заказ не найден"));
@@ -81,14 +81,24 @@ public class OrderStageService {
         OrderStageType stageType = orderStageTypeRepository.findByName(request.getStageType())
                 .orElseThrow(() -> new ValidationException("Тип этапа не найден"));
 
-        // ИСПРАВЛЕНО: Используем метод findByOrderIdAndTypeName вместо findByOrderIdAndType
+        // Проверяем, были ли этапы такого типа вообще в истории заказа
         List<OrderStage> existingStages = orderStageRepository.findByOrderIdAndTypeName(orderId, request.getStageType());
-        boolean hasActiveStage = existingStages.stream().anyMatch(stage -> !stage.getIsCompleted());
 
-        if (hasActiveStage) {
-            throw new ValidationException("Активный этап такого типа уже существует");
+        // Если этап такого типа уже был в истории
+        if (!existingStages.isEmpty()) {
+            // Находим последний этап такого типа (не важно, активный или завершенный)
+            OrderStage lastStage = existingStages.stream()
+                    .max((s1, s2) -> s1.getCreatedAt().compareTo(s2.getCreatedAt()))
+                    .orElse(null);
+
+            if (lastStage != null) {
+                log.info("Этап '{}' уже был в истории заказа ID: {}, возвращаем существующий (ID: {})",
+                        request.getStageType(), orderId, lastStage.getId());
+                return orderMapper.toStageDTO(lastStage);
+            }
         }
 
+        // Создаем новый этап
         OrderStage orderStage = OrderStage.builder()
                 .order(order)
                 .type(stageType)
@@ -102,7 +112,8 @@ public class OrderStageService {
                 .build();
 
         OrderStage savedStage = orderStageRepository.save(orderStage);
-        log.info("Создан этап '{}' для заказа ID: {}", stageType.getName(), orderId);
+        log.info("Создан этап '{}' (ID: {}) для заказа ID: {}",
+                stageType.getName(), savedStage.getId(), orderId);
 
         return orderMapper.toStageDTO(savedStage);
     }

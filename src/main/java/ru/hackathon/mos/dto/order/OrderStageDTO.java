@@ -71,9 +71,6 @@ public class OrderStageDTO {
         @NotBlank(message = "Тип этапа обязателен")
         private String stageType;
 
-        @Schema(description = "Название этапа", example = "Возведение стен")
-        private String stageName;
-
         @Schema(description = "Описание работ", example = "Кладка несущих стен и перегородок")
         private String description;
 

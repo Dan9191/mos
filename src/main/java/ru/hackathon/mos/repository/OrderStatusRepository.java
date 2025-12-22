@@ -16,28 +16,28 @@ public interface OrderStatusRepository extends JpaRepository<OrderStatus, Long> 
 
     /**
      * Найти все статусы заказа
-     **/
+     */
     @Query("SELECT os FROM OrderStatus os WHERE os.order.id = :orderId ORDER BY os.createdAt DESC")
     Page<OrderStatus> findByOrderId(@Param("orderId") Long orderId, Pageable pageable);
 
     /**
      * Найти последний статус заказа
-     **/
+     */
     @Query("SELECT os FROM OrderStatus os WHERE os.order.id = :orderId ORDER BY os.createdAt DESC LIMIT 1")
     Optional<OrderStatus> findLatestByOrderId(@Param("orderId") Long orderId);
 
     /**
-     * Найти статусы определенного типа по заказу
-      */
-    @Query("SELECT os FROM OrderStatus os WHERE os.order.id = :orderId AND os.type.name = :statusType")
+     * Найти статусы определенного типа по заказу (исправлено - принимает String)
+     */
+    @Query("SELECT os FROM OrderStatus os WHERE os.order.id = :orderId AND UPPER(os.type.name) = UPPER(:statusType)")
     List<OrderStatus> findByOrderIdAndType(@Param("orderId") Long orderId,
                                            @Param("statusType") String statusType);
 
     /**
-     * Проверить существование статуса определенного типа
+     * Проверить существование статуса определенного типа (исправлено - принимает String)
      */
     @Query("SELECT CASE WHEN COUNT(os) > 0 THEN true ELSE false END " +
-            "FROM OrderStatus os WHERE os.order.id = :orderId AND os.type.name = :statusType")
+            "FROM OrderStatus os WHERE os.order.id = :orderId AND UPPER(os.type.name) = UPPER(:statusType)")
     boolean existsByOrderIdAndType(@Param("orderId") Long orderId,
                                    @Param("statusType") String statusType);
 }

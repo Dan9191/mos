@@ -69,43 +69,49 @@ public class OrderStatusService {
     }
 
     /**
-     * Создать новый статус для заказа
+     * Создать новый статус для заказа с идемпотентностью
      */
     @Transactional
     public OrderStatusDTO createOrderStatus(Long orderId, UUID userId,
                                             OrderStatusDTO.CreateStatusRequest request) {
-        log.info("Создание статуса для заказа ID: {}", orderId);
+        log.info("Создание статуса для заказа ID: {}, тип: {}", orderId, request.getStatusType());
 
-        // Находим заказ
+        // 1. Проверяем существование заказа
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Заказ не найден"));
 
-        // Находим пользователя
+        // 2. Находим пользователя
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
-        // Находим тип статуса по имени из запроса
-        OrderStatusType statusType = orderStatusTypeRepository.findByName(request.getStatusType())
+        // 3. Находим тип статуса
+        String statusTypeStr = request.getStatusType().toUpperCase();
+        OrderStatusType statusType = orderStatusTypeRepository.findByName(statusTypeStr)
                 .orElseThrow(() -> new ValidationException("Тип статуса не найден: " + request.getStatusType()));
 
-        // Проверяем, не установлен ли уже такой статус
+        // 4. Получаем ПОСЛЕДНИЙ статус
         OrderStatus latestStatus = orderStatusRepository.findLatestByOrderId(orderId).orElse(null);
-        if (latestStatus != null && latestStatus.getType().getName().toString().equals(request.getStatusType())) {
-            throw new ValidationException("Статус '" + request.getStatusType() + "' уже установлен");
+
+        // 5. ПРОВЕРКА 1: Если запрашиваемый статус уже последний - идемпотентность
+        if (latestStatus != null &&
+                latestStatus.getType().getName().toString().equalsIgnoreCase(statusTypeStr)) {
+            log.info("Статус '{}' уже является текущим для заказа ID: {}, возвращаем существующий (ID: {})",
+                    statusTypeStr, orderId, latestStatus.getId());
+            return orderMapper.toStatusDTO(latestStatus);
         }
 
-        // Создаем новый статус
+        // 6. СОЗДАНИЕ нового статуса
         OrderStatus orderStatus = new OrderStatus();
         orderStatus.setOrder(order);
         orderStatus.setType(statusType);
         orderStatus.setChangedBy(user);
         orderStatus.setCreatedAt(LocalDateTime.now());
 
-        // Сохраняем статус
         OrderStatus savedStatus = orderStatusRepository.save(orderStatus);
-        log.info("Создан статус '{}' для заказа ID: {}", statusType.getName(), orderId);
 
-        // Возвращаем DTO
+        log.info("Создан статус '{}' (ID: {}) для заказа ID: {}",
+                statusType.getName(), savedStatus.getId(), orderId);
+
         return orderMapper.toStatusDTO(savedStatus);
     }
 
