@@ -10,6 +10,7 @@ public record TemplateListDto(
         Double areaM2,
         Integer rooms,
         BigDecimal basePrice,
+        boolean isActive,
         String previewUrl,     // ссылка на превью
         LocalDateTime createdAt
 ) {}

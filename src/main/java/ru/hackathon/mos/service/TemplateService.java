@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import ru.hackathon.mos.config.*;
+import ru.hackathon.mos.config.AppConfig;
 import ru.hackathon.mos.dto.FileDto;
 import ru.hackathon.mos.dto.template.TemplateCreateRequest;
 import ru.hackathon.mos.dto.template.TemplateDetailDto;
@@ -57,29 +57,7 @@ public class TemplateService {
     public Page<TemplateListDto> getActiveTemplates(Pageable pageable) {
         Page<ProjectTemplate> page = templateRepo.findAllByIsActiveTrue(pageable);
 
-        List<TemplateListDto> dtos = page.getContent().stream()
-                .map(template -> {
-                    String previewUrl = fileRepo.findAllByOwnerTypeAndOwnerIdAndFileRole(
-                                    "project_template", template.getId(), "preview")
-                            .stream()
-                            .findFirst()
-                            .map(f -> appConfig.getBaseUrl() + "/" + f.getId())
-                            .orElse(null);
-
-                    return new TemplateListDto(
-                            template.getId(),
-                            template.getTitle(),
-                            template.getStyle(),
-                            template.getAreaM2(),
-                            template.getRooms(),
-                            template.getBasePrice(),
-                            previewUrl,
-                            template.getCreatedAt()
-                    );
-                })
-                .toList();
-
-        return new PageImpl<>(dtos, pageable, page.getTotalElements());
+        return getTemplateListDtos(pageable, page);
     }
 
     /**
@@ -252,5 +230,46 @@ public class TemplateService {
     private boolean isImageExtension(String ext) {
         return List.of("jpg", "jpeg", "png", "webp", "gif", "bmp", "svg")
                 .contains(ext.toLowerCase());
+    }
+
+    /**
+     /**
+     * Получение списка всех шаблонов.
+     *
+     * @param pageable Настройки пагинации.
+     * @return списка всех шаблонов.
+     */
+    public Page<TemplateListDto> getTemplates(Pageable pageable) {
+        Page<ProjectTemplate> page = templateRepo.findAll(pageable);
+
+        return getTemplateListDtos(pageable, page);
+    }
+
+
+    private Page<TemplateListDto> getTemplateListDtos(Pageable pageable, Page<ProjectTemplate> page) {
+        List<TemplateListDto> dtos = page.getContent().stream()
+                .map(template -> {
+                    String previewUrl = fileRepo.findAllByOwnerTypeAndOwnerIdAndFileRole(
+                                    "project_template", template.getId(), "preview")
+                            .stream()
+                            .findFirst()
+                            .map(f -> appConfig.getBaseUrl() + "/" + f.getId())
+                            .orElse(null);
+
+                    return new TemplateListDto(
+                            template.getId(),
+                            template.getTitle(),
+                            template.getStyle(),
+                            template.getAreaM2(),
+                            template.getRooms(),
+                            template.getBasePrice(),
+                            template.getIsActive(),
+                            previewUrl,
+                            template.getCreatedAt()
+                    );
+                })
+                .toList();
+
+        return new PageImpl<>(dtos, pageable, page.getTotalElements());
     }
 }

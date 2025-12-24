@@ -54,6 +54,16 @@ public class TemplateController {
         return templateService.getActiveTemplates(pageable);
     }
 
+    @Operation(summary = "Список всех шаблонов", description = "Получение всех шаблонов с пагинацией")
+    @GetMapping("/all")
+    public Page<TemplateListDto> getAll(
+            @Parameter(description = "Настройки пагинации")
+            @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable) {
+
+        return templateService.getTemplates(pageable);
+    }
+
     @Operation(summary = "Детали шаблона-проекта", description = "Получение детальной информации о шаблоне по ID")
     @GetMapping("/{id}")
     public TemplateDetailDto get(
