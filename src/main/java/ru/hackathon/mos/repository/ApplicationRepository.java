@@ -11,13 +11,13 @@ import java.util.UUID;
 public interface ApplicationRepository extends JpaRepository<Application, Long> {
 
     @Query(value = """
-        SELECT a.* FROM application a
+        SELECT a.* FROM mos.application a
         ORDER BY 
             CASE a.status_id 
-                WHEN 1 THEN 1  -- created
-                WHEN 2 THEN 2  -- consideration  
-                WHEN 3 THEN 3  -- accepted
-                WHEN 4 THEN 4  -- rejected
+                WHEN 1 THEN 1
+                WHEN 2 THEN 2
+                WHEN 3 THEN 3
+                WHEN 4 THEN 4
                 ELSE 5
             END,
             a.created_at DESC
@@ -27,7 +27,7 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     Page<Application> findAllOrderedByStatusAndDate(Pageable pageable);
 
     @Query(value = """
-        SELECT a.* FROM application a
+        SELECT a.* FROM mos.application a
         WHERE a.creator_id = :creatorId
         ORDER BY 
             CASE a.status_id 
@@ -44,7 +44,7 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     Page<Application> findAllByCreatorIdOrderedByStatusAndDate(UUID creatorId, Pageable pageable);
 
     @Query(value = """
-        SELECT a.* FROM application a
+        SELECT a.* FROM mos.application a
         WHERE a.manager_id = :managerId
         ORDER BY 
             CASE a.status_id 
