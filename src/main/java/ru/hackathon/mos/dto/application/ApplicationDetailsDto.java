@@ -34,6 +34,10 @@ public class ApplicationDetailsDto {
     private Long projectId;
 
     @NotNull
+    @Schema(description = "Контакт для связи с клиентом", example = "+79000000000")
+    private String contact;
+
+    @NotNull
     @Schema(description = "Кодовое имя статуса заявки",
             example = "created",
             allowableValues = {"created", "consideration", "accepted", "rejected"})
@@ -59,6 +63,7 @@ public class ApplicationDetailsDto {
         this.id = application.getId();
         this.creatorId = application.getCreatorId();
         this.projectId = application.getProjectId();
+        this.contact = application.getContact();
         this.statusName = applicationStatusEnum.getName();
         this.statusDescription = applicationStatusEnum.getDescription();
         if (application.getManagerId() != null) { this.managerId = application.getManagerId(); }

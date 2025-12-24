@@ -44,6 +44,9 @@ public class Application {
     @Column(name = "project_id", nullable = false)
     private Long projectId;
 
+    @Column(name = "contact", nullable = false)
+    private String contact;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
             name = "status_id",

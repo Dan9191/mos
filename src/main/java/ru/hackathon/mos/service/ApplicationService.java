@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.hackathon.mos.dto.application.ApplicationCreateRequest;
 import ru.hackathon.mos.dto.application.ApplicationDetailsDto;
 import ru.hackathon.mos.entity.Application;
 import ru.hackathon.mos.entity.ApplicationStatus;
@@ -69,13 +70,13 @@ public class ApplicationService {
     /**
      * Создать заявку. Заявка создается пользователем.
      *
-     * @param templateId ID шаблона-проекта.
-     * @param userUuid   ID пользователя.
+     * @param request  Данные для заявки.
+     * @param userUuid ID пользователя.
      * @return созданная заявка
      */
     @Transactional
-    public ApplicationDetailsDto createApplication(Long templateId, String userUuid) {
-        ProjectTemplate template = templateRepository.findById(templateId)
+    public ApplicationDetailsDto createApplication(ApplicationCreateRequest request, String userUuid) {
+        ProjectTemplate template = templateRepository.findById(request.getTemplateId())
                 .orElseThrow(() -> new RuntimeException("Template not found"));
 
         ApplicationStatus status = statusRepository.findById(CREATED.getId())
@@ -84,6 +85,7 @@ public class ApplicationService {
         Application app = new Application();
         app.setCreatorId(UUID.fromString(userUuid));
         app.setStatus(status);
+        app.setContact(request.getContact());
         app.setManagerId(null);
         app.setCreatedAt(java.time.Instant.now());
         app.setProjectId(template.getId());

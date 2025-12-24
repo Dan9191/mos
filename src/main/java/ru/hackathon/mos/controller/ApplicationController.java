@@ -38,7 +38,7 @@ public class ApplicationController {
     @Operation(summary = "Получить список заявок")
     public Page<ApplicationDetailsDto> list(
             @Parameter(description = "Настройки пагинации")
-            @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC)
+            @PageableDefault(size = 12, sort = "created_at", direction = Sort.Direction.DESC)
             Pageable pageable) {
         return applicationService.findAllSortByStatus(pageable);
     }
@@ -48,7 +48,7 @@ public class ApplicationController {
             description = "Доступно обычному пользователю")
     public Page<ApplicationDetailsDto> listByUser(
             @Parameter(description = "Настройки пагинации")
-            @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC)
+            @PageableDefault(size = 12, sort = "created_at", direction = Sort.Direction.DESC)
             Pageable pageable,
             @AuthenticationPrincipal Jwt jwt) {
         UUID userId = UUID.fromString(jwt.getSubject());
@@ -60,7 +60,7 @@ public class ApplicationController {
             description = "Доступно менеджеру и админу")
     public Page<ApplicationDetailsDto> listByManager(
             @Parameter(description = "Настройки пагинации")
-            @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC)
+            @PageableDefault(size = 12, sort = "created_at", direction = Sort.Direction.DESC)
             Pageable pageable,
             @AuthenticationPrincipal Jwt jwt) {
         UUID userId = UUID.fromString(jwt.getSubject());
@@ -75,7 +75,7 @@ public class ApplicationController {
             @Valid @RequestBody ApplicationCreateRequest request
     ) {
         String userId = jwt.getSubject();
-        return applicationService.createApplication(request.getTemplateId(), userId);
+        return applicationService.createApplication(request, userId);
     }
 
     @Operation(summary = "Взять заявку на исполнение")

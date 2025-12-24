@@ -9,6 +9,10 @@ import lombok.Data;
 public class ApplicationCreateRequest {
 
     @NotNull
-    @Schema(description = "ID шаблона проекта")
+    @Schema(description = "ID шаблона проекта", requiredMode = Schema.RequiredMode.REQUIRED)
     private Long templateId;
+
+    @NotNull
+    @Schema(description = "Контакт для связи с клиентом", requiredMode = Schema.RequiredMode.REQUIRED)
+    private String contact;
 }
