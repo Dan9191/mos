@@ -48,7 +48,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/files/**").permitAll()
                         // блок операций по шаблонам
                         .requestMatchers(HttpMethod.GET, "/api/templates/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/templates/all").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
                         .requestMatchers(HttpMethod.POST, "/api/templates/**").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
                         .requestMatchers(HttpMethod.PUT, "/api/templates/**").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
                         .requestMatchers(HttpMethod.POST, "/api/applications").hasAuthority("ROLE_hackathon.user")
