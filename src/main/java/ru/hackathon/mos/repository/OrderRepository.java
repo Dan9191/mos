@@ -24,6 +24,12 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Page<Order> findByUserId(@Param("userId") UUID userId, Pageable pageable);
 
     /**
+     * Найти все заказы менеджера
+     */
+    @Query("SELECT o FROM Order o WHERE o.managerId = :managerId")
+    Page<Order> findByManagerId(@Param("managerId") UUID managerId, Pageable pageable);
+
+    /**
      * Найти заказы пользователя с определенным статусом
      */
     @Query("SELECT o FROM Order o WHERE o.client.id = :userId AND " +

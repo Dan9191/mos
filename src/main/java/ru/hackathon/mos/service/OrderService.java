@@ -79,6 +79,35 @@ public class OrderService {
     }
 
     /**
+     * Получить список заказов по выбранному менеджеру
+     */
+    public ListResponse<OrderDTO> getOrdersByManager(UUID managerId, Pageable pageable) {
+        log.info("Получение заказов для менеджера ID: {}", managerId);
+
+        Page<Order> ordersPage = orderRepository.findByManagerId(managerId, pageable);
+
+        List<OrderDTO> orderDTOs = ordersPage.getContent().stream()
+                .map(order -> {
+                    OrderDTO dto = orderMapper.toDTO(order);
+                    // Добавляем текущий статус
+                    orderStatusRepository.findLatestByOrderId(order.getId())
+                            .ifPresent(status -> dto.setCurrentStatus(orderMapper.toStatusDTO(status)));
+                    // Добавляем текущий этап
+                    orderStageRepository.findCurrentStageByOrderId(order.getId())
+                            .ifPresent(stage -> dto.setCurrentStage(orderMapper.toStageDTO(stage)));
+                    return dto;
+                })
+                .collect(Collectors.toList());
+
+        return ListResponse.<OrderDTO>builder()
+                .items(orderDTOs)
+                .total(ordersPage.getTotalElements())
+                .page(pageable.getPageNumber())
+                .pageSize(pageable.getPageSize())
+                .build();
+    }
+
+    /**
      * Получить информацию о заказе
      */
     public OrderDTO getOrderById(Long orderId) {

@@ -64,6 +64,27 @@ public class OrderController {
         return ResponseEntity.ok(orders);
     }
 
+    @GetMapping("/manager")
+    @Operation(summary = "Список заказов текущего менеджера",
+            description = "Получить список заказов авторизованного пользователя (менеджера)")
+    public ResponseEntity<ListResponse<OrderDTO>> getManagerOrders(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt,desc") String sort) {
+
+        UUID managerId = UUID.fromString(jwt.getSubject());
+
+        String[] sortParams = sort.split(",");
+        Sort.Direction direction = sortParams.length > 1 && "desc".equals(sortParams[1])
+                ? Sort.Direction.DESC : Sort.Direction.ASC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
+
+        ListResponse<OrderDTO> orders = orderService.getOrdersByManager(managerId, pageable);
+        return ResponseEntity.ok(orders);
+    }
+
     @GetMapping("/{orderId}")
     @Operation(summary = "Информация о заказе", description = "Получить информацию о заказе")
     public ResponseEntity<OrderDTO> getOrderById(
