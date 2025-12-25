@@ -114,7 +114,11 @@ public class TemplateService {
         template.setAreaM2(request.areaM2());
         template.setRooms(request.rooms());
         template.setBasePrice(request.basePrice());
-        template.setIsActive(true);
+        if (request.isActive() != null) {
+            template.setIsActive(request.isActive());
+        } else {
+            template.setIsActive(true);
+        }
 
         ProjectTemplate saved = templateRepo.save(template);
         saveFiles(saved.getId(), files, ownerUserId);
