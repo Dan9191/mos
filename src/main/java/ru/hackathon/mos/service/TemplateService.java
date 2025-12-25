@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import ru.hackathon.mos.config.AppConfig;
+import ru.hackathon.mos.config.AppPropertiesConfig;
 import ru.hackathon.mos.dto.FileDto;
 import ru.hackathon.mos.dto.template.TemplateCreateRequest;
 import ru.hackathon.mos.dto.template.TemplateDetailDto;
@@ -46,7 +46,7 @@ public class TemplateService {
     /**
      * Конфигурация приложения.
      */
-    private final AppConfig appConfig;
+    private final AppPropertiesConfig appPropertiesConfig;
 
     /**
      * Получение списка активных шаблонов.
@@ -75,7 +75,7 @@ public class TemplateService {
                 .map(f -> new FileDto(
                         f.getId(),
                         f.getFilename(),
-                        appConfig.getBaseUrl() + "/" + f.getId(),
+                        appPropertiesConfig.getBaseUrl() + "/" + f.getId(),
                         f.getFileRole(),
                         f.getSortOrder()
                 ))
@@ -257,7 +257,7 @@ public class TemplateService {
                                     "project_template", template.getId(), "preview")
                             .stream()
                             .findFirst()
-                            .map(f -> appConfig.getBaseUrl() + "/" + f.getId())
+                            .map(f -> appPropertiesConfig.getBaseUrl() + "/" + f.getId())
                             .orElse(null);
 
                     return new TemplateListDto(

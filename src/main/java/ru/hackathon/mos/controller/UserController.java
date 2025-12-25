@@ -11,6 +11,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +21,8 @@ import ru.hackathon.mos.dto.user.UserViewDto;
 import ru.hackathon.mos.service.UserService;
 
 import java.util.UUID;
+
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 @RestController
 @RequestMapping("/api/users")
@@ -33,7 +36,7 @@ public class UserController {
     @Operation(summary = "Получить список пользователей")
     public Page<UserViewDto> list(
             @Parameter(description = "Настройки пагинации")
-            @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC)
+            @PageableDefault(size = 12, sort = "created_at", direction = Sort.Direction.DESC)
             Pageable pageable) {
         return userService.findAllUsers(pageable);
     }
@@ -53,5 +56,14 @@ public class UserController {
     ) {
         UUID userId = UUID.fromString(jwt.getSubject());
         return userService.update(userId, request);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Получение данных пользователя по идентификатору",
+            description = "Доступно для администратора и менеджеров")
+    public UserViewDto getUserById(
+            @Parameter(description = "Идентификатор пользователя (UUID)")
+            @PathVariable UUID id) {
+        return userService.findUserById(id);
     }
 }

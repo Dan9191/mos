@@ -44,6 +44,8 @@ public class TemplateController {
      */
     private final TemplateService templateService;
 
+    private final ObjectMapper objectMapper;
+
     @Operation(summary = "Список активных шаблонов-проектов", description = "Получение списка активных шаблонов с пагинацией")
     @GetMapping
     public Page<TemplateListDto> list(
@@ -79,8 +81,7 @@ public class TemplateController {
             @Parameter(description = "Файлы, прикрепленные к шаблону") @RequestPart(value = "files", required = false) MultipartFile[] files
     ) throws IOException {
         String userId = jwt.getSubject();
-        ObjectMapper mapper = new ObjectMapper();
-        TemplateCreateRequest request = mapper.readValue(dataJson, TemplateCreateRequest.class);
+        TemplateCreateRequest request = objectMapper.readValue(dataJson, TemplateCreateRequest.class);
 
         ProjectTemplate created = templateService.createTemplate(request, files, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
@@ -91,10 +92,11 @@ public class TemplateController {
     public ProjectTemplate update(
             @Parameter(hidden = true) @AuthenticationPrincipal Jwt jwt,
             @Parameter(description = "ID шаблона для обновления") @PathVariable Long id,
-            @Parameter(description = "Новые данные шаблона") @RequestPart("data") TemplateCreateRequest request,
+            @Parameter(description = "Новые данные шаблона") @RequestPart("data") String dataJson,
             @Parameter(description = "Файлы для обновления шаблона") @RequestPart(value = "files", required = false) MultipartFile[] files
     ) throws IOException {
         String userId = jwt.getSubject();
+        TemplateCreateRequest request = objectMapper.readValue(dataJson, TemplateCreateRequest.class);
         return templateService.updateTemplate(id, request, files, userId);
     }
 }
