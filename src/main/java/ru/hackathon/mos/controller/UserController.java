@@ -36,7 +36,7 @@ public class UserController {
     @Operation(summary = "Получить список пользователей")
     public Page<UserViewDto> list(
             @Parameter(description = "Настройки пагинации")
-            @PageableDefault(size = 12, sort = "created_at", direction = Sort.Direction.DESC)
+            @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC)
             Pageable pageable) {
         return userService.findAllUsers(pageable);
     }
