@@ -64,10 +64,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/orders/**").hasAnyAuthority("ROLE_hackathon.user", "ROLE_hackathon.admin", "ROLE_hackathon.manager")
                         .requestMatchers(HttpMethod.PATCH, "/api/orders/**").hasAnyAuthority("ROLE_hackathon.user", "ROLE_hackathon.admin", "ROLE_hackathon.manager")
                         // блок операций по данным пользователя
-                        .requestMatchers(HttpMethod.GET, "/api/users").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
                         .requestMatchers(HttpMethod.GET, "/api/users/me").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager", "ROLE_hackathon.user")
                         .requestMatchers(HttpMethod.POST, "/api/users/me").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager", "ROLE_hackathon.user")
-                        .requestMatchers(HttpMethod.GET, "/api/users/**").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager", "ROLE_hackathon.user")
+                        .requestMatchers(HttpMethod.GET, "/api/users/{id:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}}")
+                        .hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
+                        .requestMatchers(HttpMethod.GET, "/api/users").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
                         // регистрация пользователя
                         .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
                         // тестовые запросы

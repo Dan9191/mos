@@ -61,8 +61,9 @@ public class UserController {
     @GetMapping("/{id}")
     @Operation(summary = "Получение данных пользователя по идентификатору",
             description = "Доступно для администратора и менеджеров")
-    public UserViewDto getUserById(@Parameter(description = "ID заказа") @PathVariable String id) {
-        UUID userId = UUID.fromString(id);
-        return userService.findUserById(userId);
+    public UserViewDto getUserById(
+            @Parameter(description = "Идентификатор пользователя (UUID)")
+            @PathVariable UUID id) {
+        return userService.findUserById(id);
     }
 }
