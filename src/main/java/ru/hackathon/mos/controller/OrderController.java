@@ -92,7 +92,7 @@ public class OrderController {
             @Parameter(description = "ID заказа") @PathVariable Long orderId) {
 
         UUID userId = UUID.fromString(jwt.getSubject());
-        orderService.checkOrderAccess(orderId, userId);
+//        orderService.checkOrderAccess(orderId, userId);
 
         OrderDTO order = orderService.getOrderById(orderId);
         return ResponseEntity.ok(order);
@@ -108,7 +108,7 @@ public class OrderController {
             @RequestParam(defaultValue = "10") int size) {
 
         UUID userId = UUID.fromString(jwt.getSubject());
-        orderService.checkOrderAccess(orderId, userId);
+//        orderService.checkOrderAccess(orderId, userId);
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         OrderStageDTO.StageListResponse stages = orderStageService.getOrderStages(orderId, pageable);
@@ -127,8 +127,7 @@ public class OrderController {
 
         try {
             UUID userId = UUID.fromString(jwt.getSubject());
-
-            orderService.checkOrderAccess(orderId, userId);
+//            orderService.checkOrderAccess(orderId, userId);
 
             OrderStageDTO result = orderStageService.createOrderStage(orderId, userId, request);
             return ResponseEntity.ok(result);
@@ -147,7 +146,7 @@ public class OrderController {
             @RequestParam(defaultValue = "10") int size) {
 
         UUID userId = UUID.fromString(jwt.getSubject());
-        orderService.checkOrderAccess(orderId, userId);
+//        orderService.checkOrderAccess(orderId, userId);
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         OrderStatusDTO.StatusListResponse statuses = orderStatusService.getAllOrderStatuses(orderId, pageable);
@@ -162,7 +161,7 @@ public class OrderController {
             @Valid @RequestBody OrderStatusDTO.CreateStatusRequest request) {
 
         UUID userId = UUID.fromString(jwt.getSubject());
-        orderService.checkOrderAccess(orderId, userId);
+//        orderService.checkOrderAccess(orderId, userId);
 
         OrderStatusDTO status = orderStatusService.createOrderStatus(orderId, userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(status);
@@ -176,6 +175,7 @@ public class OrderController {
 
         UUID userId = UUID.fromString(jwt.getSubject());
         UUID managerId = UUID.fromString(jwt.getSubject());
+
         OrderDTO order = orderService.createOrder(userId, managerId,request);
         return ResponseEntity.status(HttpStatus.CREATED).body(order);
     }
@@ -189,7 +189,7 @@ public class OrderController {
             @Valid @RequestBody OrderStageDTO.UpdateStageRequest request) {
 
         UUID userId = UUID.fromString(jwt.getSubject());
-        orderService.checkOrderAccess(orderId, userId);
+//        orderService.checkOrderAccess(orderId, userId);
 
         OrderStageDTO stage = orderStageService.updateOrderStage(stageId, userId, request);
         return ResponseEntity.ok(stage);
@@ -202,7 +202,7 @@ public class OrderController {
             @Parameter(description = "ID заказа") @PathVariable Long orderId) {
 
         UUID userId = UUID.fromString(jwt.getSubject());
-        orderService.checkOrderAccess(orderId, userId);
+//        orderService.checkOrderAccess(orderId, userId);
 
         OrderStageDTO stage = orderStageService.getCurrentStage(orderId);
         return ResponseEntity.ok(stage);
@@ -215,7 +215,7 @@ public class OrderController {
             @Parameter(description = "ID заказа") @PathVariable Long orderId) {
 
         UUID userId = UUID.fromString(jwt.getSubject());
-        orderService.checkOrderAccess(orderId, userId);
+//        orderService.checkOrderAccess(orderId, userId);
 
         OrderStatusDTO status = orderStatusService.getCurrentStatus(orderId);
         return ResponseEntity.ok(status);
