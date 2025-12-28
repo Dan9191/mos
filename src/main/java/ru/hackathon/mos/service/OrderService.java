@@ -170,7 +170,8 @@ public class OrderService {
         }
     }
 
-    private void createInitialStatus(Order order, User user) {
+    @Transactional
+    public void createInitialStatus(Order order, User user) {
 
         String statusName = OrderStatusType.StatusName.NEW.getValue();
 

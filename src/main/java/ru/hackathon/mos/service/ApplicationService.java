@@ -46,6 +46,7 @@ public class ApplicationService {
     private final ApplicationStatusRepository statusRepository;
     private final ProjectTemplateRepository templateRepository;
     private final OrderRepository orderRepository;
+    private final OrderService orderService;
 
 
     /**
@@ -159,6 +160,9 @@ public class ApplicationService {
         User client = userRepository.findById(app.getCreatorId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        User manager = userRepository.findById(UUID.fromString(managerUuid))
+                .orElseThrow(() -> new RuntimeException("Manager not found"));
+
         app.setManagerId(UUID.fromString(managerUuid));
         app.setStatus(status);
 
@@ -173,6 +177,9 @@ public class ApplicationService {
                 .createdAt(LocalDateTime.now())
                 .build();
         orderRepository.save(order);
+
+        orderService.createInitialStatus(order, manager);
+
         log.info("Accepted application {}", app.getId());
         log.info("Order id: '{}' created", savedApp.getId());
         return new ApplicationDetailsDto(savedApp);
