@@ -26,6 +26,7 @@ public class OrderMapper {
                     order.getClient().getMiddleName()
             ));
             userInfo.setEmail(order.getClient().getEmail());
+            userInfo.setContact(order.getClientContact());
             orderDTO.setClientInfo(userInfo);
         }
 

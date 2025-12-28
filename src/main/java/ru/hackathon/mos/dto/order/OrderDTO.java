@@ -30,6 +30,7 @@ public class OrderDTO {
         private UUID id;
         private String fullName;
         private String email;
+        private String contact;
     }
 
     @Data

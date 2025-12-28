@@ -173,6 +173,7 @@ public class ApplicationService {
                 .client(client)
                 .managerId(UUID.fromString(managerUuid))
                 .project(project)
+                .clientContact(app.getContact())
                 .address("Временно не заполнено")
                 .createdAt(LocalDateTime.now())
                 .build();
