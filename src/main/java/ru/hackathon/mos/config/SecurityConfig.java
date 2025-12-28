@@ -70,9 +70,9 @@ public class SecurityConfig {
                         .hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
                         .requestMatchers(HttpMethod.GET, "/api/users").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
                         // блок операций по камерам
-                        .requestMatchers(HttpMethod.POST, "/api/orders/*/webCameras").hasAnyAuthority("ROLE_hackathon.admin")
-                        .requestMatchers(HttpMethod.PUT, "/api/orders/*/webCameras/**").hasAnyAuthority("ROLE_hackathon.admin")
-                        .requestMatchers(HttpMethod.DELETE, "/api/orders/*/webCameras/**").hasAnyAuthority("ROLE_hackathon.admin")
+                        .requestMatchers(HttpMethod.POST, "/api/orders/*/webCameras").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
+                        .requestMatchers(HttpMethod.PUT, "/api/orders/*/webCameras/**").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
+                        .requestMatchers(HttpMethod.DELETE, "/api/orders/*/webCameras/**").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
                         // регистрация пользователя
                         .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
                         // тестовые запросы

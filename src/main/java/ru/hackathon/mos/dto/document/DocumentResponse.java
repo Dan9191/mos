@@ -9,5 +9,6 @@ public record DocumentResponse(
         String status,
         LocalDateTime createdAt,
         String fileName,
-        String content
+        String content,
+        String url
 ) {}

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.hackathon.mos.dto.document.DocumentCreateRequest;
 import ru.hackathon.mos.dto.document.DocumentResponse;
 import ru.hackathon.mos.dto.document.DocumentSignRequest;
 import ru.hackathon.mos.service.DocumentService;
@@ -38,6 +39,16 @@ public class DocumentController {
 
         var documents = documentService.getDocumentsByOrderId(orderId);
         return ResponseEntity.ok(documents);
+    }
+
+    @PostMapping
+    @Operation(summary = "Загрузка документа", description = "Загрузить документ")
+    public ResponseEntity<DocumentResponse> addDocuments(
+            @PathVariable Long orderId,
+            @RequestBody DocumentCreateRequest request
+    ) {
+        documentService.createDocument(orderId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @GetMapping("/{documentId}")

@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.hackathon.mos.config.AppPropertiesConfig;
 import ru.hackathon.mos.entity.Document;
 import ru.hackathon.mos.entity.DocumentType;
+import ru.hackathon.mos.entity.FileEntity;
 import ru.hackathon.mos.entity.Order;
 import ru.hackathon.mos.exception.DocumentNotFoundException;
 import ru.hackathon.mos.exception.DocumentTypeNotFoundException;
@@ -33,6 +35,11 @@ public class DocumentService {
     private final OrderRepository orderRepository;
     private final DocumentTypeRepository documentTypeRepository;
     private final FileEntityService fileEntityService;
+
+    /**
+     * Конфигурация приложения.
+     */
+    private final AppPropertiesConfig appPropertiesConfig;
 
     /**
      * Получить все документы по ID заказа
@@ -71,33 +78,42 @@ public class DocumentService {
      */
     @Transactional
     public DocumentResponse createDocument(Long orderId, DocumentCreateRequest request) {
-        log.info("Создание документа для заказа с ID: {}", orderId);
+        try {
+            log.info("Создание документа для заказа с ID: {}", orderId);
 
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException("Заказ с ID " + orderId + " не найден"));
+            Order order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new OrderNotFoundException("Заказ с ID " + orderId + " не найден"));
 
-        DocumentType documentType = documentTypeRepository.findByName(DocumentType.TypeName.valueOf(request.type().toUpperCase()))
-                .orElseThrow(() -> new DocumentTypeNotFoundException("Тип документа не найден: " + request.type()));
+            DocumentType documentType = documentTypeRepository.findByName(DocumentType.TypeName.valueOf(request.type().toUpperCase()))
+                    .orElseThrow(() -> new DocumentTypeNotFoundException("Тип документа не найден: " + request.type()));
 
-        Document document = Document.builder()
-                .order(order)
-                .type(documentType)
-                .title(request.title())
-                .description(request.description())
-                .status("draft") // Статус по умолчанию
-                .version(1)
-                .build();
+            Document document = Document.builder()
+                    .order(order)
+                    .type(documentType)
+                    .title(request.title())
+                    .description(request.description())
+                    .status("draft") // Статус по умолчанию
+                    .version(1)
+                    .build();
 
-        // Если есть файл, сохраняем его
-        if (request.fileContent() != null && !request.fileContent().isEmpty()) {
-            Long fileEntityId = fileEntityService.saveFile(document);
-            document.setFileEntityId(fileEntityId);
+            // Если есть файл, сохраняем его
+
+
+            Document savedDocument = documentRepository.save(document);
+
+            if (request.fileContent() != null && !request.fileContent().isEmpty()) {
+                FileEntity fileEntity = fileEntityService.saveDocument(document.getId(), request);
+                document.setFileEntityId(fileEntity.getId());
+            }
+
+            log.info("Документ создан с ID: {}", savedDocument.getId());
+            return convertToDocumentResponse(savedDocument);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException(e);
         }
 
-        Document savedDocument = documentRepository.save(document);
 
-        log.info("Документ создан с ID: {}", savedDocument.getId());
-        return convertToDocumentResponse(savedDocument);
     }
 
     /**
@@ -292,12 +308,13 @@ public class DocumentService {
 
         return new DocumentResponse(
                 document.getId(),
-                document.getType().getName().getValue(),
+                document.getType().getName().name(),
                 document.getTitle(),
                 document.getStatus(),
                 document.getCreatedAt(),
                 fileName, //тут лучше возвращать полное название документа, а не только его расширение
-                fileContent
+                fileContent,
+                appPropertiesConfig.getBaseUrl() + "/" + document.getFileEntityId()
         );
     }
 
