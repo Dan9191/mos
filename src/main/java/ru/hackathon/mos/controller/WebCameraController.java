@@ -62,9 +62,6 @@ public class WebCameraController {
     public ResponseEntity<List<WebCameraResponse>> getWebCameras(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long orderId) {
-        UUID userId = UUID.fromString(jwt.getSubject());
-        orderService.checkOrderAccess(orderId, userId);
-
         List<WebCameraResponse> cameras = webCameraService.getWebCameras(orderId);
         return ResponseEntity.ok(cameras);
     }
@@ -75,9 +72,6 @@ public class WebCameraController {
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long orderId,
             @PathVariable Long webCameraId) {
-        UUID userId = UUID.fromString(jwt.getSubject());
-        orderService.checkOrderAccess(orderId, userId);
-
         WebCameraResponse response = webCameraService.getWebCamera(orderId, webCameraId);
         return ResponseEntity.ok(response);
     }
