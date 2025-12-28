@@ -31,9 +31,6 @@ public class WebCameraController {
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long orderId,
             @Valid @RequestBody WebCameraRequest webCameraRequest) {
-        UUID userId = UUID.fromString(jwt.getSubject());
-        orderService.checkOrderAccess(orderId, userId);
-
         WebCameraResponse response = webCameraService.addWebCamera(orderId, webCameraRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -45,11 +42,22 @@ public class WebCameraController {
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long orderId,
             @PathVariable Long webCameraId) {
+        webCameraService.deleteWebCamera(orderId, webCameraId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{cameraId}")
+    @Operation(summary = "Обновить информацию о камере")
+    public ResponseEntity<WebCameraResponse> updateWebCamera(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable Long orderId,
+            @PathVariable Long webCameraId,
+            @Valid @RequestBody WebCameraRequest webCameraRequest) {
         UUID userId = UUID.fromString(jwt.getSubject());
         orderService.checkOrderAccess(orderId, userId);
 
-        webCameraService.deleteWebCamera(orderId, webCameraId);
-        return ResponseEntity.noContent().build();
+        WebCameraResponse response = webCameraService.updateWebCamera(orderId, webCameraId, webCameraRequest);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
@@ -74,20 +82,6 @@ public class WebCameraController {
         orderService.checkOrderAccess(orderId, userId);
 
         WebCameraResponse response = webCameraService.getWebCamera(orderId, webCameraId);
-        return ResponseEntity.ok(response);
-    }
-
-    @PutMapping("/{cameraId}")
-    @Operation(summary = "Обновить информацию о камере")
-    public ResponseEntity<WebCameraResponse> updateWebCamera(
-            @AuthenticationPrincipal Jwt jwt,
-            @PathVariable Long orderId,
-            @PathVariable Long webCameraId,
-            @Valid @RequestBody WebCameraRequest webCameraRequest) {
-        UUID userId = UUID.fromString(jwt.getSubject());
-        orderService.checkOrderAccess(orderId, userId);
-
-        WebCameraResponse response = webCameraService.updateWebCamera(orderId, webCameraId, webCameraRequest);
         return ResponseEntity.ok(response);
     }
 }
