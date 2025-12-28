@@ -26,6 +26,7 @@ import ru.hackathon.mos.dto.order.CreateOrderRequest;
 import ru.hackathon.mos.dto.order.OrderDTO;
 import ru.hackathon.mos.dto.order.OrderStageDTO;
 import ru.hackathon.mos.dto.order.OrderStatusDTO;
+import ru.hackathon.mos.dto.order.OrderUpdateRequest;
 import ru.hackathon.mos.service.OrderService;
 import ru.hackathon.mos.service.OrderStageService;
 import ru.hackathon.mos.service.OrderStatusService;
@@ -95,6 +96,17 @@ public class OrderController {
 //        orderService.checkOrderAccess(orderId, userId);
 
         OrderDTO order = orderService.getOrderById(orderId);
+        return ResponseEntity.ok(order);
+    }
+
+    @PostMapping("/{orderId}/address")
+    @Operation(summary = "Обновление адреса заказа", description = "выставляем переданный адрес")
+    public ResponseEntity<OrderDTO> setAddressByOrderId(
+            @Parameter(description = "ID заказа") @PathVariable Long orderId,
+            @Valid @RequestBody OrderUpdateRequest request
+    ) {
+
+        OrderDTO order = orderService.updateOrder(orderId, request);
         return ResponseEntity.ok(order);
     }
 

@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.hackathon.mos.dto.common.ListResponse;
 import ru.hackathon.mos.dto.order.CreateOrderRequest;
 import ru.hackathon.mos.dto.order.OrderDTO;
+import ru.hackathon.mos.dto.order.OrderUpdateRequest;
 import ru.hackathon.mos.entity.Order;
 import ru.hackathon.mos.entity.OrderStatus;
 import ru.hackathon.mos.entity.OrderStatusType;
@@ -115,6 +116,37 @@ public class OrderService {
 
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Заказ не найден"));
+
+        OrderDTO dto = orderMapper.toDTO(order);
+
+        orderStatusRepository.findLatestByOrderId(orderId)
+                .ifPresent(status -> dto.setCurrentStatus(orderMapper.toStatusDTO(status)));
+
+        orderStageRepository.findCurrentStageByOrderId(orderId)
+                .ifPresent(stage -> dto.setCurrentStage(orderMapper.toStageDTO(stage)));
+
+        return dto;
+    }
+
+    /**
+     * Обновление заказа.
+     *
+     * @param orderId Идентификатор заказа.
+     * @param request Обновляемые поля.
+     * @return результат обновления
+     */
+    @Transactional
+    public OrderDTO updateOrder(Long orderId, OrderUpdateRequest request) {
+        log.info("Обновление информации о заказе ID: {}", orderId);
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Заказ не найден"));
+
+        order.setAddress(request.getAddress());
+
+        orderRepository.save(order);
+
+        log.info("Обновление информации о заказе ID: {} прошло успешно", orderId);
 
         OrderDTO dto = orderMapper.toDTO(order);
 
