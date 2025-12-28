@@ -53,9 +53,6 @@ public class WebCameraController {
             @PathVariable Long orderId,
             @PathVariable Long webCameraId,
             @Valid @RequestBody WebCameraRequest webCameraRequest) {
-        UUID userId = UUID.fromString(jwt.getSubject());
-        orderService.checkOrderAccess(orderId, userId);
-
         WebCameraResponse response = webCameraService.updateWebCamera(orderId, webCameraId, webCameraRequest);
         return ResponseEntity.ok(response);
     }
