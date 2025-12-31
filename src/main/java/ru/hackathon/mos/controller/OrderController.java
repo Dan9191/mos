@@ -117,7 +117,7 @@ public class OrderController {
             @AuthenticationPrincipal Jwt jwt,
             @Parameter(description = "ID заказа") @PathVariable Long orderId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "20") int size) {
 
         UUID userId = UUID.fromString(jwt.getSubject());
 //        orderService.checkOrderAccess(orderId, userId);

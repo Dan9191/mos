@@ -16,10 +16,23 @@ import java.util.List;
 public class OrderStageType {
 
     public enum StageName {
+        SITE_PREPARATION("site_preparation"),
+        EXCAVATION("excavation"),
         FOUNDATION("foundation"),
         WALLS("walls"),
+        FLOOR_SLABS("floor_slabs"),
         ROOF("roof"),
-        FINISHING("finishing");
+        WINDOWS_DOORS("windows_doors"),
+        EXTERIOR_WALLS("exterior_walls"),
+        EXTERIOR_INSULATION("exterior_insulation"),
+        HEATING_VENTILATION("heating_ventilation"),
+        ELECTRICAL("electrical"),
+        PLUMBING("plumbing"),
+        WALL_PREPARATION("wall_preparation"),
+        FLOOR_COVERING("floor_covering"),
+        FINISHING("finishing"),
+        PAINTING_DECORATING("painting_decorating"),
+        LANDSCAPING("landscaping");
 
         private final String value;
 
@@ -41,7 +54,6 @@ public class OrderStageType {
             throw new IllegalArgumentException("Неизвестный этап: " + value);
         }
 
-        // Добавляем toString для возврата строкового значения
         @Override
         public String toString() {
             return this.value;
