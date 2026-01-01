@@ -89,11 +89,7 @@ public class OrderController {
     @GetMapping("/{orderId}")
     @Operation(summary = "Информация о заказе", description = "Получить информацию о заказе")
     public ResponseEntity<OrderDTO> getOrderById(
-            @AuthenticationPrincipal Jwt jwt,
             @Parameter(description = "ID заказа") @PathVariable Long orderId) {
-
-        UUID userId = UUID.fromString(jwt.getSubject());
-//        orderService.checkOrderAccess(orderId, userId);
 
         OrderDTO order = orderService.getOrderById(orderId);
         return ResponseEntity.ok(order);
@@ -114,13 +110,9 @@ public class OrderController {
     @Operation(summary = "Этапы строительства",
             description = "Получить историю этапов строительства по заказу")
     public ResponseEntity<OrderStageDTO.StageListResponse> getOrderStages(
-            @AuthenticationPrincipal Jwt jwt,
             @Parameter(description = "ID заказа") @PathVariable Long orderId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-
-        UUID userId = UUID.fromString(jwt.getSubject());
-//        orderService.checkOrderAccess(orderId, userId);
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         OrderStageDTO.StageListResponse stages = orderStageService.getOrderStages(orderId, pageable);
@@ -139,7 +131,6 @@ public class OrderController {
 
         try {
             UUID userId = UUID.fromString(jwt.getSubject());
-//            orderService.checkOrderAccess(orderId, userId);
 
             OrderStageDTO result = orderStageService.createOrderStage(orderId, userId, request);
             return ResponseEntity.ok(result);
@@ -152,13 +143,9 @@ public class OrderController {
     @GetMapping("/{orderId}/status")
     @Operation(summary = "Статусы заказа", description = "Получить все статусы заказа")
     public ResponseEntity<OrderStatusDTO.StatusListResponse> getAllOrderStatus(
-            @AuthenticationPrincipal Jwt jwt,
             @Parameter(description = "ID заказа") @PathVariable Long orderId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-
-        UUID userId = UUID.fromString(jwt.getSubject());
-//        orderService.checkOrderAccess(orderId, userId);
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         OrderStatusDTO.StatusListResponse statuses = orderStatusService.getAllOrderStatuses(orderId, pageable);
@@ -173,7 +160,6 @@ public class OrderController {
             @Valid @RequestBody OrderStatusDTO.CreateStatusRequest request) {
 
         UUID userId = UUID.fromString(jwt.getSubject());
-//        orderService.checkOrderAccess(orderId, userId);
 
         OrderStatusDTO status = orderStatusService.createOrderStatus(orderId, userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(status);
@@ -201,7 +187,6 @@ public class OrderController {
             @Valid @RequestBody OrderStageDTO.UpdateStageRequest request) {
 
         UUID userId = UUID.fromString(jwt.getSubject());
-//        orderService.checkOrderAccess(orderId, userId);
 
         OrderStageDTO stage = orderStageService.updateOrderStage(stageId, userId, request);
         return ResponseEntity.ok(stage);
@@ -210,11 +195,7 @@ public class OrderController {
     @GetMapping("/{orderId}/stages/current")
     @Operation(summary = "Текущий этап", description = "Получить текущий активный этап заказа")
     public ResponseEntity<OrderStageDTO> getCurrentStage(
-            @AuthenticationPrincipal Jwt jwt,
             @Parameter(description = "ID заказа") @PathVariable Long orderId) {
-
-        UUID userId = UUID.fromString(jwt.getSubject());
-//        orderService.checkOrderAccess(orderId, userId);
 
         OrderStageDTO stage = orderStageService.getCurrentStage(orderId);
         return ResponseEntity.ok(stage);
@@ -223,11 +204,7 @@ public class OrderController {
     @GetMapping("/{orderId}/status/current")
     @Operation(summary = "Текущий статус", description = "Получить текущий статус заказа")
     public ResponseEntity<OrderStatusDTO> getCurrentStatus(
-            @AuthenticationPrincipal Jwt jwt,
             @Parameter(description = "ID заказа") @PathVariable Long orderId) {
-
-        UUID userId = UUID.fromString(jwt.getSubject());
-//        orderService.checkOrderAccess(orderId, userId);
 
         OrderStatusDTO status = orderStatusService.getCurrentStatus(orderId);
         return ResponseEntity.ok(status);
