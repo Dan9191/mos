@@ -92,7 +92,7 @@ public class DocumentService {
                     .type(documentType)
                     .title(request.title())
                     .description(request.description())
-                    .status("draft") // Статус по умолчанию
+                    .status("pending") // Статус по умолчанию
                     .version(1)
                     .build();
 

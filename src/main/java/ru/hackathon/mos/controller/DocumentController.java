@@ -32,10 +32,7 @@ public class DocumentController {
     @GetMapping
     @Operation(summary = "Получить список документов по заказу", description = "Вернет список документов для указанного заказа")
     public ResponseEntity<List<DocumentResponse>> getDocuments(
-            @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long orderId) {
-        UUID userId = UUID.fromString(jwt.getSubject());
-//        orderService.checkOrderAccess(orderId, userId);
 
         var documents = documentService.getDocumentsByOrderId(orderId);
         return ResponseEntity.ok(documents);
@@ -54,11 +51,8 @@ public class DocumentController {
     @GetMapping("/{documentId}")
     @Operation(summary = "Получить документ по ID", description = "Возвращает детальную информацию о документе")
     public ResponseEntity<DocumentResponse> getDocument(
-            @AuthenticationPrincipal Jwt jwt,
             @PathVariable Long orderId,
             @PathVariable Long documentId) {
-        UUID userId = UUID.fromString(jwt.getSubject());
-//        orderService.checkOrderAccess(orderId, userId);
 
         var document = documentService.getDocumentById(orderId, documentId);
         return ResponseEntity.ok(document);
