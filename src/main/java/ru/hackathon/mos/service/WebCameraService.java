@@ -13,6 +13,8 @@ import ru.hackathon.mos.exception.WebCameraNotFoundException;
 import ru.hackathon.mos.repository.OrderRepository;
 import ru.hackathon.mos.repository.WebCameraRepository;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -166,13 +168,26 @@ public class WebCameraService {
      * Генерация URL для трансляции
      */
     private String generateStreamUrl(WebCamera webCamera) {
+
+        // Если это демо-камера, возвращаем фиксированную ссылку
+        if (webCamera.getName() != null && webCamera.getName().contains("Демо")) {
+            return "https://rtsp.me/embed/aey5ASBG";
+        }
+
         if (webCamera.getIpAddress() == null || webCamera.getPort() == null) {
             return null;
         }
 
         // Пример: rtsp://192.168.1.100:554/stream
-        return String.format("rtsp://%s:%d/stream",
+        String rtspUrl = String.format("rtsp://%s:%d/stream",
                 webCamera.getIpAddress(),
                 webCamera.getPort());
+
+        // Кодируем RTSP URL для RTSP.me
+        // Эта часть кода преобразует чистый RTSP URL в embed-ссылку RTSP.me, которая работает в браузере.
+        String encodedRtsp = Base64.getEncoder()
+                .encodeToString(rtspUrl.getBytes(StandardCharsets.UTF_8));
+
+        return "https://rtsp.me/embed/" + encodedRtsp;
     }
 }
