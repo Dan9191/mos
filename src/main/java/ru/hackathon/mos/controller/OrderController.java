@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -208,5 +209,14 @@ public class OrderController {
 
         OrderStatusDTO status = orderStatusService.getCurrentStatus(orderId);
         return ResponseEntity.ok(status);
+    }
+
+    @DeleteMapping("/{orderId}/stages/{stageId}")
+    @Operation(summary = "Текущий этап", description = "Удалить текущий активный этап заказа")
+    public void deleteCurrentStage(
+            @Parameter(description = "ID заказа") @PathVariable Long orderId,
+            @Parameter(description = "ID стадии") @PathVariable long stageId
+    ) {
+        orderStageService.deleteCurrentStage(stageId);
     }
 }

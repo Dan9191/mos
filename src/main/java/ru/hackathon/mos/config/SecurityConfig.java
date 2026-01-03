@@ -63,6 +63,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/orders/**").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager", "ROLE_hackathon.user")
                         .requestMatchers(HttpMethod.GET, "/api/orders/**").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager", "ROLE_hackathon.user")
                         .requestMatchers(HttpMethod.PATCH, "/api/orders/**").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager", "ROLE_hackathon.user")
+                        .requestMatchers(HttpMethod.DELETE, "/api/orders/**").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
                         // блок операций по данным пользователя
                         .requestMatchers(HttpMethod.GET, "/api/users/me").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager", "ROLE_hackathon.user")
                         .requestMatchers(HttpMethod.POST, "/api/users/me").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager", "ROLE_hackathon.user")

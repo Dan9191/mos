@@ -162,10 +162,24 @@ public class OrderStageService {
      * Получить текущий активный этап
      */
     public OrderStageDTO getCurrentStage(Long orderId) {
-        // ИСПРАВЛЕНО: Используем исправленный метод findCurrentStageByOrderId
+
         OrderStage stage = orderStageRepository.findCurrentStageByOrderId(orderId)
                 .orElseThrow(() -> new NotFoundException("Активный этап не найден"));
 
         return orderMapper.toStageDTO(stage);
+    }
+
+    /**
+     * Удалить текущий активный этап
+     */
+    @Transactional
+    public void deleteCurrentStage(Long stageId) {
+        log.info("Удаление этапа ID: {}", stageId);
+
+        OrderStage orderStage = orderStageRepository.findById(stageId)
+                .orElseThrow(() -> new NotFoundException("Этап не найден"));
+
+        orderStageRepository.delete(orderStage);
+        log.info("Этап ID: {} удален", stageId);
     }
 }
