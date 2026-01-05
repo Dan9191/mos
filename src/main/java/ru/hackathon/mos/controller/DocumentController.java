@@ -15,9 +15,20 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.hackathon.mos.dto.document.DocumentCreateRequest;
 import ru.hackathon.mos.dto.document.DocumentResponse;
 import ru.hackathon.mos.dto.document.DocumentSignRequest;
+import ru.hackathon.mos.entity.Document;
+import ru.hackathon.mos.entity.FileEntity;
+import ru.hackathon.mos.exception.NotFoundException;
+import ru.hackathon.mos.repository.DocumentRepository;
+import ru.hackathon.mos.repository.FileEntityRepository;
 import ru.hackathon.mos.service.DocumentService;
 import ru.hackathon.mos.service.OrderService;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,6 +39,8 @@ import java.util.UUID;
 public class DocumentController {
     private final OrderService orderService;
     private final DocumentService documentService;
+    private final DocumentRepository documentRepository;
+    private final FileEntityRepository fileRepo;
 
     @GetMapping
     @Operation(summary = "Получить список документов по заказу", description = "Вернет список документов для указанного заказа")
@@ -36,6 +49,31 @@ public class DocumentController {
 
         var documents = documentService.getDocumentsByOrderId(orderId);
         return ResponseEntity.ok(documents);
+    }
+
+    @GetMapping("/{documentId}/download")
+    @Operation(summary = "Скачать файл документа")
+    public ResponseEntity<Resource> downloadDocumentFile(
+            @PathVariable Long orderId,
+            @PathVariable Long documentId) {
+
+        Document document = documentRepository.findByIdAndOrderId(documentId, orderId)
+                .orElseThrow(() -> new NotFoundException("Документ не найден"));
+
+        if (document.getFileEntityId() == null) {
+            throw new NotFoundException("Файл не найден");
+        }
+
+        FileEntity file = fileRepo.findById(document.getFileEntityId())
+                .orElseThrow(() -> new NotFoundException("Файл не найден"));
+
+        ByteArrayResource resource = new ByteArrayResource(file.getFileData());
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(file.getMimeType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + encodeFilename(file.getFilename()) + "\"")
+                .body(resource);
     }
 
     @PostMapping
@@ -72,5 +110,17 @@ public class DocumentController {
         documentService.signDocument(orderId, documentId, documentSignRequest);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    /**
+     * Кодирование имени файла для безопасной передачи в HTTP-заголовках
+     */
+    private String encodeFilename(String filename) {
+        try {
+            return URLEncoder.encode(filename, StandardCharsets.UTF_8)
+                    .replace("+", "%20");
+        } catch (Exception e) {
+            return filename;
+        }
     }
 }
