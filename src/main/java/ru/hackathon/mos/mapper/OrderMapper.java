@@ -52,7 +52,7 @@ public class OrderMapper {
         dto.setId(orderStatus.getId());
         dto.setOrderId(orderStatus.getOrder() != null ? orderStatus.getOrder().getId() : null);
         dto.setStatusType(orderStatus.getType() != null ? orderStatus.getType().getName().toString() : null);
-        dto.setComment(null);
+        dto.setComment(orderStatus.getComment() != null ? orderStatus.getComment() : null);
         dto.setChangedBy(toChangedByUser(orderStatus.getChangedBy()));
         dto.setCreatedAt(orderStatus.getCreatedAt());
 

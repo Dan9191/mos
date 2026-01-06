@@ -25,6 +25,9 @@ public class OrderStatus {
     @JoinColumn(name = "type_id", nullable = false)
     private OrderStatusType type;
 
+    @Column(name = "comment")
+    private String comment;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "status_changed_by", nullable = false)
     private User changedBy;

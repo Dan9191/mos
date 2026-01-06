@@ -84,10 +84,12 @@ public class OrderStatusService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
-        // 3. Находим тип статуса
+        // 3. Находим тип статуса и комментарий к статусу
         String statusTypeStr = request.getStatusType().toUpperCase();
         OrderStatusType statusType = orderStatusTypeRepository.findByName(statusTypeStr)
                 .orElseThrow(() -> new ValidationException("Тип статуса не найден: " + request.getStatusType()));
+
+        String comment = request.getComment();
 
         // 4. Получаем ПОСЛЕДНИЙ статус
         OrderStatus latestStatus = orderStatusRepository.findLatestByOrderId(orderId).orElse(null);
@@ -104,6 +106,7 @@ public class OrderStatusService {
         OrderStatus orderStatus = new OrderStatus();
         orderStatus.setOrder(order);
         orderStatus.setType(statusType);
+        orderStatus.setComment(comment);
         orderStatus.setChangedBy(user);
         orderStatus.setCreatedAt(LocalDateTime.now());
 
