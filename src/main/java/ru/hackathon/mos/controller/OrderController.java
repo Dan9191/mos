@@ -96,6 +96,14 @@ public class OrderController {
         return ResponseEntity.ok(order);
     }
 
+    @DeleteMapping("/{orderId}")
+    @Operation(summary = "Информация о заказе", description = "Удалить заказ (тестовый метод)")
+    public void deleteOrderById(
+            @Parameter(description = "ID заказа") @PathVariable Long orderId) {
+
+        orderService.deleteOrderById(orderId);
+    }
+
     @PostMapping("/{orderId}/address")
     @Operation(summary = "Обновление адреса заказа", description = "выставляем переданный адрес")
     public ResponseEntity<OrderDTO> setAddressByOrderId(
