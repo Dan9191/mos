@@ -54,6 +54,10 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testImplementation 'org.testcontainers:junit-jupiter:1.21.3'
 	testImplementation 'org.testcontainers:postgresql:1.21.3'
+
+    // Apache POI для работы с Office документами
+    implementation 'org.apache.poi:poi:5.2.3'
+    implementation 'org.apache.poi:poi-ooxml:5.2.3'
 }
 
 tasks.named('test') {

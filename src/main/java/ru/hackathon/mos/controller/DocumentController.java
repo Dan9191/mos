@@ -96,6 +96,73 @@ public class DocumentController {
         return ResponseEntity.ok(document);
     }
 
+    @GetMapping("/{documentId}/view")
+    @Operation(summary = "Просмотреть файл документа в браузере")
+    public ResponseEntity<Resource> viewDocumentFile(
+            @PathVariable Long orderId,
+            @PathVariable Long documentId) {
+
+        Document document = documentRepository.findByIdAndOrderId(documentId, orderId)
+                .orElseThrow(() -> new NotFoundException("Документ не найден"));
+
+        if (document.getFileEntityId() == null) {
+            throw new NotFoundException("Файл не найден");
+        }
+
+        FileEntity file = fileRepo.findById(document.getFileEntityId())
+                .orElseThrow(() -> new NotFoundException("Файл не найден"));
+
+        byte[] fileData = file.getFileData();
+        String fileName = file.getFilename();
+        String mimeType = file.getMimeType();
+
+        // Определяем тип файла по расширению
+        boolean isOfficeFile = false;
+        String textContent = null;
+
+        if (fileName != null) {
+            String lowerName = fileName.toLowerCase();
+
+            if (lowerName.endsWith(".docx")) {
+                isOfficeFile = true;
+                textContent = documentService.convertDocxToText(fileData);
+            } else if (lowerName.endsWith(".xlsx")) {
+                isOfficeFile = true;
+                textContent = documentService.convertXlsxToText(fileData);
+            }
+        }
+
+        // Если это Office файл, возвращаем текст
+        if (isOfficeFile && textContent != null) {
+            ByteArrayResource resource = new ByteArrayResource(textContent.getBytes(StandardCharsets.UTF_8));
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "inline; filename=\"" + encodeFilename(fileName + ".txt") + "\"")
+                    .body(resource);
+        }
+
+        // Для остальных файлов - стандартная логика
+        ByteArrayResource resource = new ByteArrayResource(fileData);
+        String contentDisposition = "inline";
+
+        if (mimeType != null && (
+                mimeType.startsWith("application/pdf") ||
+                        mimeType.startsWith("image/") ||
+                        mimeType.startsWith("text/"))) {
+            contentDisposition = "inline";
+        } else {
+            contentDisposition = "attachment";
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(mimeType))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        contentDisposition + "; filename=\"" + encodeFilename(fileName) + "\"")
+                .body(resource);
+    }
+
     @PostMapping("/{documentId}/sign")
     @Operation(summary = "Подписать документ", description = "Подписать документ электронной подписью")
     @ResponseStatus(HttpStatus.CREATED)

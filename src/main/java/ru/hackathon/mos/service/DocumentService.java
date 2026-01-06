@@ -20,6 +20,12 @@ import ru.hackathon.mos.dto.document.DocumentSignRequest;
 import ru.hackathon.mos.dto.document.DocumentCreateRequest;
 import ru.hackathon.mos.dto.document.DocumentUpdateRequest;
 
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import java.io.ByteArrayInputStream;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Base64;
@@ -371,6 +377,79 @@ public class DocumentService {
             Base64.getDecoder().decode(signature);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Некорректный формат подписи (ожидается base64)");
+        }
+    }
+
+    /**
+     * Конвертирует DOCX в простой текст
+     */
+    public String convertDocxToText(byte[] docxData) {
+        try {
+            XWPFDocument document = new XWPFDocument(new ByteArrayInputStream(docxData));
+            StringBuilder text = new StringBuilder();
+
+            text.append("=== СОДЕРЖАНИЕ ДОКУМЕНТА ===\n\n");
+
+            for (XWPFParagraph paragraph : document.getParagraphs()) {
+                String paragraphText = paragraph.getText();
+                if (!paragraphText.trim().isEmpty()) {
+                    text.append(paragraphText).append("\n");
+                }
+            }
+
+            document.close();
+            return text.toString();
+
+        } catch (Exception e) {
+            log.warn("Не удалось прочитать DOCX: {}", e.getMessage());
+            return "Не удалось прочитать содержимое DOCX файла.\n\n" +
+                    "Пожалуйста, скачайте файл для просмотра.";
+        }
+    }
+
+    /**
+     * Конвертирует XLSX в простой текст
+     */
+    public String convertXlsxToText(byte[] xlsxData) {
+        try {
+            Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(xlsxData));
+            StringBuilder text = new StringBuilder();
+
+            text.append("=== ТАБЛИЧНЫЕ ДАННЫЕ ===\n\n");
+
+            for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
+                Sheet sheet = workbook.getSheetAt(i);
+                text.append("Лист: ").append(sheet.getSheetName()).append("\n");
+                text.append("-".repeat(50)).append("\n");
+
+                for (Row row : sheet) {
+                    for (Cell cell : row) {
+                        switch (cell.getCellType()) {
+                            case STRING:
+                                text.append(cell.getStringCellValue()).append("\t");
+                                break;
+                            case NUMERIC:
+                                text.append(cell.getNumericCellValue()).append("\t");
+                                break;
+                            case BOOLEAN:
+                                text.append(cell.getBooleanCellValue()).append("\t");
+                                break;
+                            default:
+                                text.append("[пусто]\t");
+                        }
+                    }
+                    text.append("\n");
+                }
+                text.append("\n");
+            }
+
+            workbook.close();
+            return text.toString();
+
+        } catch (Exception e) {
+            log.warn("Не удалось прочитать XLSX: {}", e.getMessage());
+            return "Не удалось прочитать содержимое таблицы.\n\n" +
+                    "Пожалуйста, скачайте файл для просмотра.";
         }
     }
 }
