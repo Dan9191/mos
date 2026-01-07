@@ -96,6 +96,15 @@ public class DocumentController {
         return ResponseEntity.ok(document);
     }
 
+    @DeleteMapping("/{documentId}")
+    @Operation(summary = "Удалить документ по ID", description = "Удалить документ по ID физически (тестовый метод)")
+    public void deleteDocument(
+            @PathVariable Long orderId,
+            @PathVariable Long documentId) {
+
+        documentService.deleteDocument(orderId, documentId);
+    }
+
     @GetMapping("/{documentId}/view")
     @Operation(summary = "Просмотреть файл документа в браузере")
     public ResponseEntity<Resource> viewDocumentFile(

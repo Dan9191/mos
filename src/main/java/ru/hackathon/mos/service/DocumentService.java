@@ -187,12 +187,11 @@ public class DocumentService {
                         String.format("Документ с ID %s не найден для заказа с ID %s", documentId, orderId)
                 ));
 
-        // Логическое удаление - меняем статус
-        document.setStatus("deleted");
-        documentRepository.save(document);
+//        // Логическое удаление - меняем статус
+//        document.setStatus("deleted");
+//        documentRepository.save(document);
 
-        // Если нужно физическое удаление:
-        // documentRepository.delete(document);
+        documentRepository.delete(document);
 
         log.info("Документ с ID {} помечен как удаленный", documentId);
     }
