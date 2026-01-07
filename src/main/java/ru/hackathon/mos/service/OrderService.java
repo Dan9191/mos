@@ -3,6 +3,7 @@ package ru.hackathon.mos.service;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -218,5 +219,26 @@ public class OrderService {
 
         orderStatusRepository.save(initialStatus);
         log.info("Создан начальный статус 'new' для заказа ID: {}", order.getId());
+    }
+
+    /**
+     * Удалить заказ
+     */
+    @Transactional
+    public void deleteOrderById(Long orderId) {
+        log.info("Удаление заказа с ID: {}", orderId);
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Заказ не найден"));
+
+        Hibernate.initialize(order.getStatuses());
+        Hibernate.initialize(order.getStages());
+        Hibernate.initialize(order.getDocuments());
+        Hibernate.initialize(order.getChatMessages());
+        Hibernate.initialize(order.getWebCameras());
+
+        orderRepository.delete(order);
+
+        log.info("Заказ с ID: {} успешно удален", orderId);
     }
 }
