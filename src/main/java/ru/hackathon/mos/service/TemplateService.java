@@ -177,7 +177,7 @@ public class TemplateService {
                 "project_template", templateId, "preview"
         );
 
-        int currentSortOrder = 1;
+        int currentSortOrder = fileRepo.getNextSortOrder("project_template", templateId);
 
         for (MultipartFile file : files) {
             if (file.isEmpty()) continue;
