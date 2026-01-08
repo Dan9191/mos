@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.hackathon.mos.dto.document.DocumentCreateRequest;
+import ru.hackathon.mos.dto.document.DocumentInformation;
 import ru.hackathon.mos.dto.document.DocumentResponse;
 import ru.hackathon.mos.dto.document.DocumentSignRequest;
 import ru.hackathon.mos.entity.Document;
@@ -44,7 +45,7 @@ public class DocumentController {
 
     @GetMapping
     @Operation(summary = "Получить список документов по заказу", description = "Вернет список документов для указанного заказа")
-    public ResponseEntity<List<DocumentResponse>> getDocuments(
+    public ResponseEntity<List<DocumentInformation>> getDocuments(
             @PathVariable Long orderId) {
 
         var documents = documentService.getDocumentsByOrderId(orderId);

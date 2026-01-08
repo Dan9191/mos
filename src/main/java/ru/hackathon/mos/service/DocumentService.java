@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.hackathon.mos.config.AppPropertiesConfig;
+import ru.hackathon.mos.dto.document.*;
 import ru.hackathon.mos.entity.Document;
 import ru.hackathon.mos.entity.DocumentType;
 import ru.hackathon.mos.entity.FileEntity;
@@ -50,7 +51,7 @@ public class DocumentService {
     /**
      * Получить все документы по ID заказа
      */
-    public List<DocumentResponse> getDocumentsByOrderId(Long orderId) {
+    public List<DocumentInformation> getDocumentsByOrderId(Long orderId) {
         log.info("Получение документов для заказа с ID: {}", orderId);
 
         // Проверяем существование заказа
@@ -61,7 +62,7 @@ public class DocumentService {
         List<Document> documents = documentRepository.findByOrderId(orderId);
 
         return documents.stream()
-                .map(this::convertToDocumentResponse)
+                .map(this::convertToDocumentInformation)
                 .toList();
     }
 
@@ -324,6 +325,33 @@ public class DocumentService {
     }
 
     /**
+     * Конвертация Document в DocumentInformation (краткая)
+     */
+    private DocumentInformation convertToDocumentInformation(Document document) {
+        var fileEntityId = document.getFileEntityId();
+        var fileName = "Неизвестный файл";
+
+        if (fileEntityId != null) {
+            try {
+                var fileEntity = fileEntityService.getFileEntityById(fileEntityId);
+                fileName = fileEntity.getFilename();
+            } catch (Exception e) {
+                log.warn("Не удалось получить информацию о файле для documentId {}: {}",
+                        document.getId(), e.getMessage());
+            }
+        }
+
+        return new DocumentInformation(
+                document.getId(),
+                document.getType().getName().name(),
+                document.getTitle(),
+                document.getStatus(),
+                document.getCreatedAt(),
+                fileName
+        );
+    }
+
+    /**
      * Валидация документа для подписания
      */
     private void validateDocumentForSigning(Document document) {
@@ -338,6 +366,7 @@ public class DocumentService {
             throw new IllegalStateException("Документ не содержит файл для подписания");
         }
     }
+
 
     /**
      * Валидация перехода статусов
