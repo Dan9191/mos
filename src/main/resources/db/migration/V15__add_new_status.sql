@@ -1,0 +1,1 @@
+INSERT INTO order_status_type (name, description) VALUES ('CANCELLED', 'Заказ отменен');

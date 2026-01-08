@@ -20,7 +20,8 @@ public class OrderStatusType {
         DOCUMENTATION("DOCUMENTATION"),
         CONSTRUCTION("CONSTRUCTION"),
         COMPLETION("COMPLETION"),
-        CLOSED("CLOSED");
+        CLOSED("CLOSED"),
+        CANCELLED("CANCELLED");
 
         private final String value;
 
