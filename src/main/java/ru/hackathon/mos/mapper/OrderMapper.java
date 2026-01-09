@@ -16,6 +16,9 @@ public class OrderMapper {
         orderDTO.setAddress(order.getAddress());
         orderDTO.setCreatedAt(order.getCreatedAt());
 
+        // Устанавливаем managerId из сущности Order
+        orderDTO.setManagerId(order.getManagerId());
+
         // Маппинг клиента
         if (order.getClient() != null) {
             OrderDTO.UserInfoDTO userInfo = new OrderDTO.UserInfoDTO();
@@ -66,7 +69,6 @@ public class OrderMapper {
         dto.setId(orderStage.getId());
         dto.setOrderId(orderStage.getOrder() != null ? orderStage.getOrder().getId() : null);
 
-        // ИСПРАВЛЕННЫЙ КОД - на toString()
         dto.setStageType(orderStage.getType() != null ?
                 orderStage.getType().getName().getValue() : null);
 

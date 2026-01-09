@@ -1,5 +1,6 @@
 package ru.hackathon.mos.dto.order;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,6 +22,11 @@ public class OrderDTO {
     private OrderStatusDTO currentStatus;
     private OrderStageDTO currentStage;
     private LocalDateTime createdAt;
+
+    //данные менеджера
+    private UUID managerId;
+    private String managerFullName;
+    private String managerContact;
 
     @Data
     @Builder

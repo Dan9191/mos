@@ -29,8 +29,8 @@ import ru.hackathon.mos.repository.ProjectTemplateRepository;
 import ru.hackathon.mos.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -59,9 +59,33 @@ public class OrderService {
 
         Page<Order> ordersPage = orderRepository.findByUserId(user.getId(), pageable);
 
+        // Собираем ID всех менеджеров
+        Set<UUID> managerIds = ordersPage.getContent().stream()
+                .map(Order::getManagerId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        // Загружаем всех менеджеров одним запросом
+        Map<UUID, User> managersMap = userRepository.findAllById(managerIds)
+                .stream()
+                .collect(Collectors.toMap(User::getId, Function.identity()));
+
         List<OrderDTO> orderDTOs = ordersPage.getContent().stream()
                 .map(order -> {
                     OrderDTO dto = orderMapper.toDTO(order);
+
+                    // Добавляем информацию о менеджере
+                    if (order.getManagerId() != null) {
+                        User manager = managersMap.get(order.getManagerId());
+                        if (manager != null) {
+                            dto.setManagerFullName(formatFullName(
+                                    manager.getLastName(),
+                                    manager.getFirstName(),
+                                    manager.getMiddleName()
+                            ));
+                            dto.setManagerContact(manager.getEmail());
+                        }
+                    }
                     // Добавляем текущий статус
                     orderStatusRepository.findLatestByOrderId(order.getId())
                             .ifPresent(status -> dto.setCurrentStatus(orderMapper.toStatusDTO(status)));
@@ -91,6 +115,19 @@ public class OrderService {
         List<OrderDTO> orderDTOs = ordersPage.getContent().stream()
                 .map(order -> {
                     OrderDTO dto = orderMapper.toDTO(order);
+
+                    // Заполняем информацию о менеджере
+                    if (order.getManagerId() != null) {
+                        userRepository.findById(order.getManagerId()).ifPresent(manager -> {
+                            dto.setManagerFullName(formatFullName(
+                                    manager.getLastName(),
+                                    manager.getFirstName(),
+                                    manager.getMiddleName()
+                            ));
+                            dto.setManagerContact(manager.getEmail());
+                        });
+                    }
+
                     // Добавляем текущий статус
                     orderStatusRepository.findLatestByOrderId(order.getId())
                             .ifPresent(status -> dto.setCurrentStatus(orderMapper.toStatusDTO(status)));
@@ -119,6 +156,18 @@ public class OrderService {
                 .orElseThrow(() -> new NotFoundException("Заказ не найден"));
 
         OrderDTO dto = orderMapper.toDTO(order);
+
+        // Заполняем информацию о менеджере для одиночного заказа
+        if (order.getManagerId() != null) {
+            userRepository.findById(order.getManagerId()).ifPresent(manager -> {
+                dto.setManagerFullName(formatFullName(
+                        manager.getLastName(),
+                        manager.getFirstName(),
+                        manager.getMiddleName()
+                ));
+                dto.setManagerContact(manager.getEmail());
+            });
+        }
 
         orderStatusRepository.findLatestByOrderId(orderId)
                 .ifPresent(status -> dto.setCurrentStatus(orderMapper.toStatusDTO(status)));
@@ -150,6 +199,18 @@ public class OrderService {
         log.info("Обновление информации о заказе ID: {} прошло успешно", orderId);
 
         OrderDTO dto = orderMapper.toDTO(order);
+
+        // Заполняем информацию о менеджере
+        if (order.getManagerId() != null) {
+            userRepository.findById(order.getManagerId()).ifPresent(manager -> {
+                dto.setManagerFullName(formatFullName(
+                        manager.getLastName(),
+                        manager.getFirstName(),
+                        manager.getMiddleName()
+                ));
+                dto.setManagerContact(manager.getEmail());
+            });
+        }
 
         orderStatusRepository.findLatestByOrderId(orderId)
                 .ifPresent(status -> dto.setCurrentStatus(orderMapper.toStatusDTO(status)));
@@ -240,5 +301,27 @@ public class OrderService {
         orderRepository.delete(order);
 
         log.info("Заказ с ID: {} успешно удален", orderId);
+    }
+
+    private String formatFullName(String lastName, String firstName, String middleName) {
+
+        if (lastName == null && firstName == null && middleName == null) {
+            return null;
+        }
+
+        StringBuilder fullName = new StringBuilder();
+        if (lastName != null) {
+            fullName.append(lastName);
+        }
+        if (firstName != null) {
+            if (!fullName.isEmpty()) fullName.append(" ");
+            fullName.append(firstName);
+        }
+        if (middleName != null) {
+            if (!fullName.isEmpty()) fullName.append(" ");
+            fullName.append(middleName);
+        }
+
+        return fullName.isEmpty() ? null : fullName.toString();
     }
 }
