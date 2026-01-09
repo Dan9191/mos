@@ -1,5 +1,11 @@
 package ru.hackathon.mos.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -8,23 +14,45 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import ru.hackathon.mos.entity.FileEntity;
 import ru.hackathon.mos.repository.FileEntityRepository;
+import ru.hackathon.mos.service.FileEntityService;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
-@Controller
+@Tag(
+        name = "Файлы",
+        description = "Загрузка, просмотр и удаление файлов"
+)
+@RestController
+@RequestMapping("/api/files")
 @RequiredArgsConstructor
 class FileController {
 
     private final FileEntityRepository fileRepo;
 
-    @GetMapping("/api/files/{id}")
-    public ResponseEntity<Resource> serveFile(@PathVariable Long id) {
+    private final FileEntityService fileEntityService;
+
+    @Operation(
+            summary = "Получить файл по ID",
+            description = "Возвращает содержимое файла для отображения в браузере (inline)"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Файл успешно найден и возвращён"),
+            @ApiResponse(responseCode = "404", description = "Файл не найден", content = @Content)
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<Resource> serveFile(
+            @Parameter(description = "ID файла", required = true, example = "123")
+            @PathVariable Long id) {
+
         FileEntity file = fileRepo.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
@@ -51,5 +79,22 @@ class FileController {
         } catch (Exception e) {
             return filename;
         }
+    }
+
+    @Operation(
+            summary = "Удалить файл",
+            description = "Удаляет файл по указанному идентификатору. Действие необратимо."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Файл успешно удалён"),
+            @ApiResponse(responseCode = "404", description = "Файл не найден", content = @Content)
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteFile(
+            @Parameter(description = "ID файла, который нужно удалить", required = true, example = "456")
+            @PathVariable Long id) {
+
+        fileEntityService.deleteFile(id);
+        return ResponseEntity.noContent().build();
     }
 }

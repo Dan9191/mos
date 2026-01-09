@@ -41,4 +41,20 @@ public class FileEntityService {
         return fileEntityRepository.findById(fileEntityId)
                 .orElseThrow(() -> new FileNotFoundException("Файл с ID " + fileEntityId + " не найден"));
     }
+
+
+    /**
+     * Удаление файла.
+     *
+     * @param fileEntityId ID файла.
+     */
+    @Transactional
+    public void deleteFile(Long fileEntityId) {
+        FileEntity file = getFileEntityById(fileEntityId);
+
+        String filename = file.getFilename();
+        fileEntityRepository.delete(file);
+
+        log.info("A file with ID={}, filename ='{}' has been deleted.", fileEntityId, filename);
+    }
 }

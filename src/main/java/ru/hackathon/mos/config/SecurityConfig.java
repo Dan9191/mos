@@ -45,7 +45,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS).permitAll()
-                        .requestMatchers("/api/files/**").permitAll()
+                        // блок операций по файлам
+                        .requestMatchers(HttpMethod.GET,"/api/files/**").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/api/files/**").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
                         // блок операций по шаблонам
                         .requestMatchers(HttpMethod.GET, "/api/templates/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/templates/**").hasAnyAuthority("ROLE_hackathon.admin", "ROLE_hackathon.manager")
