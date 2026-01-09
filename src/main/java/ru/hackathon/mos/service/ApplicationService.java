@@ -21,8 +21,8 @@ import ru.hackathon.mos.repository.ProjectTemplateRepository;
 import ru.hackathon.mos.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static ru.hackathon.mos.dto.ApplicationStatusEnum.ACCEPTED;
 import static ru.hackathon.mos.dto.ApplicationStatusEnum.CONSIDERATION;
@@ -60,11 +60,13 @@ public class ApplicationService {
     public Page<ApplicationDetailsDto> findAllSortByStatus(Pageable pageable) {
         Page<Application> page = applicationRepository.findAllOrderedByStatusAndDate(pageable);
 
-        List<ApplicationDetailsDto> dtos = page.getContent().stream()
-                .map(ApplicationDetailsDto::new)
-                .toList();
+        List<UUID> managerIds = extractManagerIds(page.getContent());
 
-        log.info("Find all applications ");
+        Map<UUID, User> managersMap = loadManagers(managerIds);
+
+        List<ApplicationDetailsDto> dtos = convertApplicationsToDtos(page.getContent(), managersMap);
+
+        log.info("Find all applications");
         return new PageImpl<>(dtos, pageable, page.getTotalElements());
     }
 
@@ -90,9 +92,11 @@ public class ApplicationService {
         app.setManagerId(null);
         app.setCreatedAt(java.time.Instant.now());
         app.setProjectId(template.getId());
-        log.info("Creating application {}", app.getId());
-        applicationRepository.save(app);
-        return new ApplicationDetailsDto(app);
+
+        Application savedApp = applicationRepository.save(app);
+        log.info("Creating application {}", savedApp.getId());
+
+        return convertToDto(savedApp, null);
     }
 
     /**
@@ -110,11 +114,16 @@ public class ApplicationService {
         ApplicationStatus status = statusRepository.findById(CONSIDERATION.getId())
                 .orElseThrow(() -> new RuntimeException("Status 'consideration' not found"));
 
-        app.setManagerId(UUID.fromString(managerUuid));
+        User manager = userRepository.findById(UUID.fromString(managerUuid))
+                .orElseThrow(() -> new RuntimeException("Manager not found"));
+
+        app.setManagerId(manager.getId());
         app.setStatus(status);
-        log.info("Taking application {}", app.getId());
-        applicationRepository.save(app);
-        return new ApplicationDetailsDto(app);
+
+        Application savedApp = applicationRepository.save(app);
+        log.info("Taking application {}", savedApp.getId());
+
+        return convertToDto(savedApp, manager);
     }
 
     /**
@@ -132,11 +141,16 @@ public class ApplicationService {
         ApplicationStatus status = statusRepository.findById(REJECTED.getId())
                 .orElseThrow(() -> new RuntimeException("Status 'rejected' not found"));
 
-        app.setManagerId(UUID.fromString(managerUuid));
+        User manager = userRepository.findById(UUID.fromString(managerUuid))
+                .orElseThrow(() -> new RuntimeException("Manager not found"));
+
+        app.setManagerId(manager.getId());
         app.setStatus(status);
-        log.info("Rejected application {}", app.getId());
-        applicationRepository.save(app);
-        return new ApplicationDetailsDto(app);
+
+        Application savedApp = applicationRepository.save(app);
+        log.info("Rejected application {}", savedApp.getId());
+
+        return convertToDto(savedApp, manager);
     }
 
     /**
@@ -181,9 +195,10 @@ public class ApplicationService {
 
         orderService.createInitialStatus(order, manager);
 
-        log.info("Accepted application {}", app.getId());
-        log.info("Order id: '{}' created", savedApp.getId());
-        return new ApplicationDetailsDto(savedApp);
+        log.info("Accepted application {}", savedApp.getId());
+        log.info("Order id: '{}' created", order.getId());
+
+        return convertToDto(savedApp, manager);
     }
 
     /**
@@ -197,13 +212,15 @@ public class ApplicationService {
     public Page<ApplicationDetailsDto> findAllByUserSortByStatus(Pageable pageable, UUID userId) {
         Page<Application> page = applicationRepository.findAllByCreatorIdOrderedByStatusAndDate(userId, pageable);
 
-        List<ApplicationDetailsDto> dtos = page.getContent().stream()
-                .map(ApplicationDetailsDto::new)
-                .toList();
+        List<UUID> managerIds = extractManagerIds(page.getContent());
+        Map<UUID, User> managersMap = loadManagers(managerIds);
+
+        List<ApplicationDetailsDto> dtos = convertApplicationsToDtos(page.getContent(), managersMap);
 
         log.info("Find all applications by user {}", userId);
         return new PageImpl<>(dtos, pageable, page.getTotalElements());
     }
+
 
 
     /**
@@ -217,10 +234,48 @@ public class ApplicationService {
     public Page<ApplicationDetailsDto> findAllByManagerSortByStatus(Pageable pageable, UUID managerId) {
         Page<Application> page = applicationRepository.findAllByManagerIdOrderedByStatusAndDate(managerId, pageable);
 
-        List<ApplicationDetailsDto> dtos = page.getContent().stream()
-                .map(ApplicationDetailsDto::new)
-                .toList();
+        User manager = userRepository.findById(managerId).orElse(null);
+        Map<UUID, User> managersMap = new HashMap<>();
+        if (manager != null) {
+            managersMap.put(managerId, manager);
+        }
+
+        List<ApplicationDetailsDto> dtos = convertApplicationsToDtos(page.getContent(), managersMap);
+
         log.info("Find all applications by manager Id {}", managerId);
         return new PageImpl<>(dtos, pageable, page.getTotalElements());
+    }
+
+    // =============== ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ===============
+
+    private List<UUID> extractManagerIds(List<Application> applications) {
+        return applications.stream()
+                .filter(app -> app.getManagerId() != null)
+                .map(Application::getManagerId)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    private Map<UUID, User> loadManagers(List<UUID> managerIds) {
+        if (managerIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        return userRepository.findAllById(managerIds)
+                .stream()
+                .collect(Collectors.toMap(User::getId, user -> user));
+    }
+
+    private List<ApplicationDetailsDto> convertApplicationsToDtos(List<Application> applications, Map<UUID, User> managersMap) {
+        return applications.stream()
+                .map(app -> {
+                    User manager = managersMap.get(app.getManagerId());
+                    return convertToDto(app, manager);
+                })
+                .collect(Collectors.toList());
+    }
+
+    private ApplicationDetailsDto convertToDto(Application application, User manager) {
+        return new ApplicationDetailsDto(application, manager);
     }
 }

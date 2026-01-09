@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.hackathon.mos.dto.ApplicationStatusEnum;
 import ru.hackathon.mos.entity.Application;
+import ru.hackathon.mos.entity.User;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -22,7 +23,6 @@ public class ApplicationDetailsDto {
     @NotNull
     @Schema(description = "Идентификатор заявки", example = "12345")
     private Long id;
-
 
     @NotNull
     @Schema(description = "UUID пользователя, создавшего заявку",
@@ -53,12 +53,22 @@ public class ApplicationDetailsDto {
             nullable = true)
     private UUID managerId;
 
+    @Schema(description = "ФИО менеджера",
+            example = "Иванов Иван Иванович",
+            nullable = true)
+    private String managerFullName;
+
+    @Schema(description = "Контакт менеджера (email)",
+            example = "manager@example.com",
+            nullable = true)
+    private String managerContact;
+
     @NotNull
     @Schema(description = "Дата и время создания заявки в формате ISO 8601",
             example = "2024-12-15T10:30:00Z")
     private Instant createdAt;
 
-    public ApplicationDetailsDto(Application application) {
+    public ApplicationDetailsDto(Application application, User manager) {
         ApplicationStatusEnum applicationStatusEnum = ApplicationStatusEnum.fromId(application.getStatus().getId());
         this.id = application.getId();
         this.creatorId = application.getCreatorId();
@@ -66,7 +76,34 @@ public class ApplicationDetailsDto {
         this.contact = application.getContact();
         this.statusName = applicationStatusEnum.getName();
         this.statusDescription = applicationStatusEnum.getDescription();
-        if (application.getManagerId() != null) { this.managerId = application.getManagerId(); }
+
+        if (application.getManagerId() != null) {
+            this.managerId = application.getManagerId();
+
+            if (manager != null) {
+                this.managerFullName = formatManagerFullName(manager);
+                this.managerContact = manager.getEmail();
+            }
+        }
         this.createdAt = application.getCreatedAt();
+    }
+
+    private String formatManagerFullName(User manager) {
+        if (manager == null) return null;
+
+        StringBuilder fullName = new StringBuilder();
+        if (manager.getLastName() != null) {
+            fullName.append(manager.getLastName());
+        }
+        if (manager.getFirstName() != null) {
+            if (!fullName.isEmpty()) fullName.append(" ");
+            fullName.append(manager.getFirstName());
+        }
+        if (manager.getMiddleName() != null) {
+            if (!fullName.isEmpty()) fullName.append(" ");
+            fullName.append(manager.getMiddleName());
+        }
+
+        return fullName.isEmpty() ? null : fullName.toString();
     }
 }
