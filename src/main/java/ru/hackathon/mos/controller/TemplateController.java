@@ -14,13 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.hackathon.mos.dto.template.TemplateCreateRequest;
 import ru.hackathon.mos.dto.template.TemplateDetailDto;
@@ -98,5 +92,12 @@ public class TemplateController {
         String userId = jwt.getSubject();
         TemplateCreateRequest request = objectMapper.readValue(dataJson, TemplateCreateRequest.class);
         return templateService.updateTemplate(id, request, files, userId);
+    }
+
+    @Operation(summary = "Удаление шаблона-проекта", description = "Удалить шаблон по ID")
+    @DeleteMapping("/{id}")
+    public void delete(
+            @Parameter(description = "ID шаблона") @PathVariable Long id) {
+            templateService.deleteTemplate(id);
     }
 }

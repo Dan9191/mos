@@ -276,4 +276,12 @@ public class TemplateService {
 
         return new PageImpl<>(dtos, pageable, page.getTotalElements());
     }
+
+    public void deleteTemplate(Long id) {
+        ProjectTemplate template = templateRepo.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Шаблон не найден"));
+
+        templateRepo.delete(template);
+        log.info("Template with id {} was deleted", id);
+    }
 }
