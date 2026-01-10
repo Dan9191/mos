@@ -58,17 +58,9 @@ class ApplicationControllerTest {
                 .expiresAt(Instant.now().plusSeconds(3600))
                 .build();
 
-        ApplicationDetailsDto.ProjectInfoDTO projectInfo = ApplicationDetailsDto.ProjectInfoDTO.builder()
-                .id(1L)
-                .title("Дом 120м²")
-                .basePrice("5000000")
-                .totalArea("120")
-                .build();
-
         testApplication = ApplicationDetailsDto.builder()
                 .id(1L)
                 .creatorId(userId)
-                .projectInfo(projectInfo)
                 .projectId(1L)
                 .contact("+79001234567")
                 .statusName("created")
@@ -122,9 +114,12 @@ class ApplicationControllerTest {
         ApplicationDetailsDto takenApplication = ApplicationDetailsDto.builder()
                 .id(applicationId)
                 .creatorId(userId)
+                .projectId(1L)
                 .statusName("consideration")
                 .statusDescription("Заявка в рассмотрении")
                 .managerId(userId)
+                .managerFullName("Иванов Иван Иванович")
+                .managerContact("ivanov@example.com")
                 .contact("+79001234567")
                 .createdAt(Instant.now())
                 .build();
@@ -136,6 +131,55 @@ class ApplicationControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.statusName", is("consideration")))
-                .andExpect(jsonPath("$.managerId", is(userId.toString())));
+                .andExpect(jsonPath("$.managerId", is(userId.toString())))
+                .andExpect(jsonPath("$.managerFullName", is("Иванов Иван Иванович")));
+    }
+
+    @Test
+    void reject_ShouldRejectApplication() throws Exception {
+
+        Long applicationId = 1L;
+        ApplicationDetailsDto rejectedApplication = ApplicationDetailsDto.builder()
+                .id(applicationId)
+                .creatorId(userId)
+                .projectId(1L)
+                .statusName("rejected")
+                .statusDescription("Заявка отклонена")
+                .managerId(userId)
+                .contact("+79001234567")
+                .createdAt(Instant.now())
+                .build();
+
+        when(applicationService.rejectApplication(eq(applicationId), eq(userId.toString())))
+                .thenReturn(rejectedApplication);
+
+        mockMvc.perform(patch("/api/applications/{id}/reject", applicationId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.statusName", is("rejected")));
+    }
+
+    @Test
+    void accept_ShouldAcceptApplication() throws Exception {
+
+        Long applicationId = 1L;
+        ApplicationDetailsDto acceptedApplication = ApplicationDetailsDto.builder()
+                .id(applicationId)
+                .creatorId(userId)
+                .projectId(1L)
+                .statusName("accepted")
+                .statusDescription("Заявка принята")
+                .managerId(userId)
+                .contact("+79001234567")
+                .createdAt(Instant.now())
+                .build();
+
+        when(applicationService.acceptApplication(eq(applicationId), eq(userId.toString())))
+                .thenReturn(acceptedApplication);
+
+        mockMvc.perform(patch("/api/applications/{id}/accept", applicationId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.statusName", is("accepted")));
     }
 }
