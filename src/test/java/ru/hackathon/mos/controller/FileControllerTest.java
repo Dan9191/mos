@@ -86,6 +86,7 @@ class FileControllerTest {
         assertThat(exception.getStatusCode(), is(HttpStatus.NOT_FOUND));
     }
 
+    //
     @Test
     void deleteFile_ShouldCallServiceDelete() {
 

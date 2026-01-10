@@ -119,6 +119,7 @@ class TemplateControllerTest {
                 .andExpect(jsonPath("$.isActive", is(true)));
     }
 
+    //
     @Test
     void get_ShouldReturnNotFound_WhenTemplateDoesNotExist() throws Exception {
 

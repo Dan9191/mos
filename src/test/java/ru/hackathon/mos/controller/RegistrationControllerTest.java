@@ -91,7 +91,7 @@ class RegistrationControllerTest {
                 "invalid-email", // невалидный email
                 "weak", // слабый пароль
                 "", // пустое имя
-                "" // пустая фамилия
+                "" /// пустая фамилия
         );
 
         when(keycloakUserService.registerUser(

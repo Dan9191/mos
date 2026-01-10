@@ -140,6 +140,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.email", is("petr@example.com")));
     }
 
+    //
     @Test
     void update_ShouldUpdateCurrentUser() throws Exception {
 

@@ -110,7 +110,7 @@ class DocumentControllerTest {
         when(documentService.getDocumentById(orderId, documentId)).thenReturn(documentResponse);
 
         MockMvc mockMvc = MockMvcBuilders.standaloneSetup(documentController).build();
-
+        //
         mockMvc.perform(get("/api/orders/{orderId}/documents/{documentId}", orderId, documentId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(documentId.intValue())))

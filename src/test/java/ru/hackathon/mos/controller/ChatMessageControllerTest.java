@@ -156,7 +156,7 @@ class ChatMessageControllerTest {
 
         Long orderId = 1L;
         SendMessageRequest request = new SendMessageRequest();
-        request.setMessage(""); // Пустое сообщение
+        request.setMessage(""); /// Пустое сообщение
 
         mockMvc.perform(post("/api/orders/{orderId}/chatMessages", orderId)
                         .contentType(MediaType.APPLICATION_JSON)

@@ -94,6 +94,7 @@ class EventRestControllerV1Test {
                 .setCustomArgumentResolvers(authenticationPrincipalResolver)
                 .build();
 
+        //
         mockMvc.perform(get("/api/v1/events/my-resource"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("null:" + userId)); // email будет null
